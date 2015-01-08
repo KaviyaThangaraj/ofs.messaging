@@ -5,6 +5,7 @@ package ofs.messaging.Client.Impl;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import ofs.messaging.Client.ExchangeType;
 import ofs.messaging.Client.Exceptions.ChannelException;
@@ -14,6 +15,8 @@ import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.QueueingConsumer;
 
 /**
  * @author Ramanan Natarajan
@@ -23,6 +26,21 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 
 	private com.rabbitmq.client.Connection connection = null;
 	private Channel channel = null;
+
+	/**
+	 * @return the connection
+	 */
+	public com.rabbitmq.client.Connection getConnection() {
+		return connection;
+	}
+
+	/**
+	 * @param connection
+	 *            the connection to set
+	 */
+	public void setConnection(com.rabbitmq.client.Connection connection) {
+		this.connection = connection;
+	}
 
 	/**
 	 * @return the channel
@@ -139,6 +157,64 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 			throw new ChannelException("Channel closing failed", e);
 		}
 
+	}
+
+	public String basicConsume(String queue, DefaultConsumer callback) throws IOException {
+		System.out.println("inside channel consume");
+		String envelope = this.channel.basicConsume(queue, callback);
+		System.out.println(envelope.toString());
+		return envelope;
+	}
+
+	public String basicConsume(String queue, boolean autoAck, DefaultConsumer callback)
+			throws IOException {
+		return null;
+	}
+
+	public String basicConsume(String queue, boolean autoAck, Map<String, Object> arguments,
+			DefaultConsumer callback) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String basicConsume(String queue, boolean autoAck, String consumerTag,
+			DefaultConsumer callback) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String basicConsume(String queue, boolean autoAck, String consumerTag, boolean noLocal,
+			boolean exclusive, Map<String, Object> arguments, Consumer callback) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void basicCancel(String consumerTag) throws IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+	public String basicConsume(String queue, Consumer callback) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String basicConsume(String queue, boolean autoAck, Consumer callback) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String basicConsume(String queue, boolean autoAck, Map<String, Object> arguments,
+			Consumer callback) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String
+			basicConsume(String queue, boolean autoAck, String consumerTag, Consumer callback)
+					throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

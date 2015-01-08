@@ -56,7 +56,7 @@ public class test {
 
 			long startTime = System.currentTimeMillis();
 
-			for (int i = 0; i < 100000; i++) {
+			for (int i = 0; i < 1000; i++) {
 
 				Payload payload = new Payload();
 				payload.setPayLoadFormat(PayloadFormat.BINARY);
@@ -67,9 +67,10 @@ public class test {
 
 			}
 
-			clientNew.waitForScheduledTasksToComplete(200, TimeUnit.SECONDS);
+			clientNew.waitForScheduledTasksToComplete(20, TimeUnit.SECONDS);
 
 			System.out.println("done");
+
 			long endTime = System.currentTimeMillis();
 			System.out.println((endTime - startTime));
 			channelObject.close();

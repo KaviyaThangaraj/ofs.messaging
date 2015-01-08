@@ -5,6 +5,9 @@ package ofs.messaging.Client.Impl;
 
 import ofs.messaging.DataStore;
 import ofs.messaging.Util;
+import ofs.messaging.Client.Channel;
+import ofs.messaging.Client.Handler;
+import ofs.messaging.Client.MessageHandler;
 import ofs.messaging.Client.MessagingClient;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 
@@ -26,25 +29,17 @@ public class RabbitMQClient implements MessagingClient {
 	private String description;
 	private String clientName;
 	private ExecutorService executorService;
+	private MessageHandler handler;
 
 	/*
 	 * XXX: Also, when we create a client, we can return the Id, and then on registration take the
 	 * clientId and register and return back the exchange to which it has to be published
 	 */
 
-	/**
-	 * @return the executorService
-	 */
-	public ExecutorService getExecutorService() {
-		return executorService;
-	}
+	private UUID clientId;
 
-	/**
-	 * @param executorService
-	 *            the executorService to set
-	 */
-	public void setExecutorService(ExecutorService executorService) {
-		this.executorService = executorService;
+	public RabbitMQClient() {
+
 	}
 
 	/**
@@ -57,8 +52,50 @@ public class RabbitMQClient implements MessagingClient {
 
 	}
 
-	public RabbitMQClient() {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ofs.messaging.Client.MessagingClient#Consume(ofs.messaging.Client.Impl.MessageConsumer)
+	 */
+	public void Consume(MessageConsumer msgConsumer) {
 
+		this.executorService.execute(new MessageConsumer((Channel) msgConsumer.getChannel(),
+				this.handler, msgConsumer.getQueueName()) {
+
+		});
+
+	}
+
+	/**
+	 * @return the clientId
+	 */
+	public UUID getClientId() {
+		return clientId;
+	}
+
+	private String getClientName(String clientId) {
+
+		/*
+		 * XXX:temporarily, get the name from the current object. this has to be modified to take it
+		 * from the store
+		 */
+
+		return new DataStore().getClientName(clientId);
+
+	}
+
+	/**
+	 * @return the executorService
+	 */
+	public ExecutorService getExecutorService() {
+		return executorService;
+	}
+
+	/**
+	 * @return the handler
+	 */
+	public MessageHandler getHandler() {
+		return handler;
 	}
 
 	public RabbitMQClient getInstance(String clientName, String description) {
@@ -84,28 +121,14 @@ public class RabbitMQClient implements MessagingClient {
 
 	}
 
-	private UUID clientId;
+	public void publish(MessagePublisher messagePublisher) {
 
-	/*
-	 * public ofs.messaging.Client.Connection Connect() {
-	 * 
-	 * return null; }
-	 */
-	public boolean Publish() {
+		this.executorService.execute(new MessagePublisher(messagePublisher.getChannel(),
+				messagePublisher.getExchangeId(), messagePublisher.getRoutingKey(),
+				messagePublisher.getMessage()) {
 
-		return false;
-	}
+		});
 
-	public boolean Consume() {
-
-		return false;
-	}
-
-	/**
-	 * @return the clientId
-	 */
-	public UUID getClientId() {
-		return clientId;
 	}
 
 	/**
@@ -145,25 +168,20 @@ public class RabbitMQClient implements MessagingClient {
 		return (getClientName(clientId) + "." + eventId);
 	}
 
-	private String getClientName(String clientId) {
-
-		/*
-		 * XXX:temporarily, get the name from the current object. this has to be modified to take it
-		 * from the store
-		 */
-
-		return new DataStore().getClientName(clientId);
-
+	/**
+	 * @param executorService
+	 *            the executorService to set
+	 */
+	public void setExecutorService(ExecutorService executorService) {
+		this.executorService = executorService;
 	}
 
-	public void publish(MessagePublisher messagePublisher) {
-
-		this.executorService.execute(new MessagePublisher(messagePublisher.getChannel(),
-				messagePublisher.getExchangeId(), messagePublisher.getRoutingKey(),
-				messagePublisher.getMessage()) {
-
-		});
-
+	/**
+	 * @param handler
+	 *            the handler to set
+	 */
+	public void setHandler(MessageHandler handler) {
+		this.handler = handler;
 	}
 
 	public void waitForScheduledTasksToComplete(int i, TimeUnit seconds)
