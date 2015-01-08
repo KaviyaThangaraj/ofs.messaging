@@ -29,7 +29,11 @@ public class testConsumer {
 		try {
 			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS CONSUMER",
 					"OFS Client Consumer description");
+			// Query the list of all events and subscribe to it. choose an event id. below, we have
+			// assumed that this is the dispatch event
+
 			String dispatchEventId = ""; // this is the event we need to consume
+
 			final String exchangeId = clientNew.registerClient(dispatchEventId);
 			channelObject = new RabbitMQChannel(con.connect());
 			channelObject.createChannel();

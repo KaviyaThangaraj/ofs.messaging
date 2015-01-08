@@ -141,8 +141,8 @@ public class RabbitMQClient implements MessagingClient {
 		// FIXME:think later on how to create without many steps!
 
 		this.clientId = Util.getUUID();
-		// To register, for now add to a map? later move this to a datastore
 
+		// FIXME: To register, for now add to a map. later move this to a datastore
 		new DataStore().addRegistration(this.clientId.toString(), eventId.toString());
 		// this needs to be stored later to fetch for registration
 		new DataStore().addClient(this.clientId.toString(), this.clientName);

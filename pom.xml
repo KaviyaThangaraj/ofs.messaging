@@ -4,4 +4,13 @@
   <artifactId>ofs.messaging</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Messaging</name>
+ 
+  <dependencies>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.6</version>
+  		<scope>test</scope>
+  	</dependency>
+  </dependencies>
 </project>

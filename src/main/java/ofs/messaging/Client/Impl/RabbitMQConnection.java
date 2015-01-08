@@ -14,8 +14,6 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 	private String URI; // for future HTTP work
 	private Connection connection = null;
 
-	// private Connection connection = null;
-
 	public RabbitMQConnection(String URI) {
 		this.setURI(URI);
 
