@@ -12,8 +12,6 @@ import ofs.messaging.Client.Impl.MessagePublisher;
  */
 public interface MessagingClient {
 
-	// public ofs.messaging.Client.Connection Connect();
-
 	public String registerClient(String eventId);
 
 	public void Consume(MessageConsumer msgConsumer);

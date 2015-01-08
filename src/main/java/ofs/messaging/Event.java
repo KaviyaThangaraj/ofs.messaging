@@ -10,7 +10,7 @@ package ofs.messaging;
 public class Event {
 
 	/**
-	 * This class encapulates the Events that a producer can produce
+	 * This class encapulates the Events that a producer can produce and a consumer can subscribe to
 	 */
 	private String eventId;
 
@@ -22,6 +22,10 @@ public class Event {
 	}
 
 	private String eventName;
+
+	private EventPriority eventPriority;
+
+	private EventCategory eventCategory;
 
 	/**
 	 * A single argument constructor that takes in the client supplied Event Name
@@ -40,6 +44,34 @@ public class Event {
 	private String generateEventId() {
 
 		return Constants.PREFIX + "." + (this.eventName).replace(" ", ".").toUpperCase();
+	}
+
+	/**
+	 * @return the eventPriority
+	 */
+	public EventPriority getEventPriority() {
+		return eventPriority;
+	}
+
+	/**
+	 * @param eventPriority the eventPriority to set
+	 */
+	public void setEventPriority(EventPriority eventPriority) {
+		this.eventPriority = eventPriority;
+	}
+
+	/**
+	 * @return the eventCategory
+	 */
+	public EventCategory getEventCategory() {
+		return eventCategory;
+	}
+
+	/**
+	 * @param eventCategory the eventCategory to set
+	 */
+	public void setEventCategory(EventCategory eventCategory) {
+		this.eventCategory = eventCategory;
 	}
 
 }

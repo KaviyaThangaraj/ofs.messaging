@@ -50,11 +50,10 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 					+ " is Not available. Check if the Server is available." + "\n ", e);
 
 		} catch (IOException e) {
-			// should log errors. later
-			// TODO: fix me :)
+
 			throw new ConnectionFailedException(e);
 		} catch (Exception e) {
-			// generic exception. need to think a bit more!
+
 			throw new ConnectionFailedException(e);
 
 		}

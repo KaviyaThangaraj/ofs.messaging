@@ -7,6 +7,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
 
 /**
+ * @author ramanann
  *
  */
 public class HandlerResponse {

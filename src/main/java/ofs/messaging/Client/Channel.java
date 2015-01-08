@@ -30,7 +30,7 @@ public interface Channel {
 	 * 
 	 *            Exchange is the name of the exchange and type defaults to topic
 	 */
-	// TODO: to appropriately javadoc this exchange type
+	// FIXME: to appropriately javadoc this exchange type
 	public void exchangeDeclare(String exchange);
 
 	/**
@@ -53,7 +53,7 @@ public interface Channel {
 	public void exchangeDeclare(String exchange, ExchangeType type, boolean durable,
 			boolean autoDelete, boolean internal, Map<String, Object> arguments);
 
-	// TODO: understand what this mandatory flag means?. rabbit mq doesnt support immediate
+	// FIXME: understand what this mandatory flag means?. rabbit mq doesnt support immediate
 	// set default to false;
 	public void basicPublish(String exchange, String routingKey, boolean mandatory,
 			boolean immediate, byte[] body);

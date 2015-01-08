@@ -95,7 +95,7 @@ public class MessageConsumer implements Runnable {
 			channel.basicConsume(queueName, callback);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			throw new MessageDeliveryFailedException("Message consumption failed", e);
 		}
 	}

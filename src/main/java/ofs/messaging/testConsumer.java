@@ -18,7 +18,7 @@ import com.rabbitmq.client.AMQP;
 public class testConsumer {
 
 	public testConsumer() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public static void main(String[] args) {
@@ -47,10 +47,11 @@ public class testConsumer {
 						System.out.println("this is my message==>" + msg.getMessageId());
 
 					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+
+						e.printStackTrace(); // stack trace is used as this is a test harness. this
+												// shoudnt be in any core code
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 

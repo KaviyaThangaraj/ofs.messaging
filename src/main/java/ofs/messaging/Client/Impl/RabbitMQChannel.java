@@ -81,15 +81,11 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 	public void exchangeDeclare(String exchange, ExchangeType type, boolean durable,
 			boolean autoDelete, boolean internal, Map<String, Object> arguments) {
 		try {
-			// TODO: howto find out if the exchange already exists? and throw an
-			// error?
-			// if there is an api,this needs to be modified to suit it
 
-			// FIXME: cant i create a channel if not there and return this back? just a thought?
 			if (this.channel == null) {
 				throw new IllegalArgumentException("Channel has not been created yet or it is null");
 			}
-			// this.channel.exchangeDeclare(exchange, "topic", durable, autoDelete, arguments);
+
 			this.channel.exchangeDeclare(exchange, type.toString(), durable, autoDelete, arguments);
 
 		} catch (IOException e) {
@@ -115,7 +111,7 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 	public void exchangeDeclare(String exchange, ExchangeType type, boolean durable,
 			boolean autoDelete) {
 
-		// TODO: understand what false means in internal exchange
+		// FIXME: understand what false means in internal exchange
 		exchangeDeclare(exchange, type, durable, autoDelete, false, null);
 	}
 
@@ -166,6 +162,7 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 		return envelope;
 	}
 
+	// FIXME: fix all the overload methods of the basic consume
 	public String basicConsume(String queue, boolean autoAck, DefaultConsumer callback)
 			throws IOException {
 		return null;
@@ -173,47 +170,46 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 
 	public String basicConsume(String queue, boolean autoAck, Map<String, Object> arguments,
 			DefaultConsumer callback) throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	public String basicConsume(String queue, boolean autoAck, String consumerTag,
 			DefaultConsumer callback) throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	public String basicConsume(String queue, boolean autoAck, String consumerTag, boolean noLocal,
 			boolean exclusive, Map<String, Object> arguments, Consumer callback) throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	public void basicCancel(String consumerTag) throws IOException {
-		// TODO Auto-generated method stub
 
 	}
 
 	public String basicConsume(String queue, Consumer callback) throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	public String basicConsume(String queue, boolean autoAck, Consumer callback) throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	public String basicConsume(String queue, boolean autoAck, Map<String, Object> arguments,
 			Consumer callback) throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	public String
 			basicConsume(String queue, boolean autoAck, String consumerTag, Consumer callback)
 					throws IOException {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 

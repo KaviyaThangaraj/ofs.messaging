@@ -18,7 +18,7 @@ public class MessagePublishingFailedException extends RuntimeException {
 	 * 
 	 */
 	public MessagePublishingFailedException() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -27,7 +27,7 @@ public class MessagePublishingFailedException extends RuntimeException {
 	 */
 	public MessagePublishingFailedException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class MessagePublishingFailedException extends RuntimeException {
 	 */
 	public MessagePublishingFailedException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class MessagePublishingFailedException extends RuntimeException {
 	 */
 	public MessagePublishingFailedException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**

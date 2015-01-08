@@ -12,9 +12,8 @@ import org.junit.Test;
 
 /**
  * 
- * @author Ramanan Natarajan Only the set and get methods for binary data have been
- *         tested as to make sure that they are deep copied. All other cases are
- *         trivial and hence not covered
+ * @author Ramanan Natarajan Only the set and get methods for binary data have been tested as to
+ *         make sure that they are deep copied. All other cases are trivial and hence not covered
  *
  */
 public class TestPayload {

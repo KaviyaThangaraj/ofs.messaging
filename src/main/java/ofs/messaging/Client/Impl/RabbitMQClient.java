@@ -32,7 +32,7 @@ public class RabbitMQClient implements MessagingClient {
 	private MessageHandler handler;
 
 	/*
-	 * XXX: Also, when we create a client, we can return the Id, and then on registration take the
+	 * FIXME: Also, when we create a client, we can return the Id, and then on registration take the
 	 * clientId and register and return back the exchange to which it has to be published
 	 */
 
@@ -76,8 +76,8 @@ public class RabbitMQClient implements MessagingClient {
 	private String getClientName(String clientId) {
 
 		/*
-		 * XXX:temporarily, get the name from the current object. this has to be modified to take it
-		 * from the store
+		 * FIXME, get the name from the current object. this has to be modified to take it from the
+		 * store
 		 */
 
 		return new DataStore().getClientName(clientId);
@@ -136,11 +136,10 @@ public class RabbitMQClient implements MessagingClient {
 	 *            this takes in an eventId and associates the client to the event
 	 */
 
-	// FIXME: should eventid be an integer? think through
 	public String registerClient(String eventId) {
 
-		// XXX:think later on how to create without many steps!
-		// new RabbitMQClient(clientName, description);
+		// FIXME:think later on how to create without many steps!
+
 		this.clientId = Util.getUUID();
 		// To register, for now add to a map? later move this to a datastore
 
@@ -148,7 +147,7 @@ public class RabbitMQClient implements MessagingClient {
 		// this needs to be stored later to fetch for registration
 		new DataStore().addClient(this.clientId.toString(), this.clientName);
 		// return a generated exchange id
-		// return (this.clientId.toString() + string).replace("-", "");
+
 		return (getClientName(clientId.toString()) + "." + eventId);
 
 	}
@@ -156,7 +155,7 @@ public class RabbitMQClient implements MessagingClient {
 	// Future method to be refactored when we will have API's
 	public String registerClient(String clientId, String eventId) {
 
-		// XXX:think later on how to create without many steps!
+		// FIXME:think later on how to create without many steps!
 		// new RabbitMQClient(clientName, description);;
 		this.clientId = UUID.fromString(clientId);
 
