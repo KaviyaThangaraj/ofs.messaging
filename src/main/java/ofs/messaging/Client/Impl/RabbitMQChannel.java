@@ -156,9 +156,9 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 	}
 
 	public String basicConsume(String queue, DefaultConsumer callback) throws IOException {
-		System.out.println("inside channel consume");
+
 		String envelope = this.channel.basicConsume(queue, callback);
-		System.out.println(envelope.toString());
+
 		return envelope;
 	}
 

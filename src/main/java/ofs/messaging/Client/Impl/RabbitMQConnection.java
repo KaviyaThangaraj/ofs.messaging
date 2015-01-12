@@ -1,7 +1,15 @@
 package ofs.messaging.Client.Impl;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 
+import javax.naming.Context;
+
+import ofs.messaging.Client.MessagingContext;
+import ofs.messaging.Client.MessagingContextFactory;
 import ofs.messaging.Client.Exceptions.ConnectionFailedException;
 
 import com.rabbitmq.client.ConnectionFactory;
@@ -10,9 +18,14 @@ import com.rabbitmq.client.Connection;
 public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 
 	private int port;
-	private String host;
+	private String host = "localhost";
 	private String URI; // for future HTTP work
 	private Connection connection = null;
+	private Properties properties;
+
+	public RabbitMQConnection() {
+
+	}
 
 	public RabbitMQConnection(String URI) {
 		this.setURI(URI);
@@ -31,12 +44,26 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 		}
 	}
 
-	public Connection connect() {
+	@Deprecated
+	public RabbitMQConnection(Context context) throws KeyManagementException,
+			NoSuchAlgorithmException, URISyntaxException {
+
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setUri(context.PROVIDER_URL);
+
+	}
+
+	public Connection connect() throws KeyManagementException, NoSuchAlgorithmException,
+			URISyntaxException {
 
 		ConnectionFactory factory = new ConnectionFactory();
 
-		factory.setHost(host);
-		factory.setPort(port);
+		if (this.URI.isEmpty()) {
+			factory.setHost(host);
+			factory.setPort(port);
+		} else {
+			factory.setUri(URI);
+		}
 
 		try {
 			connection = factory.newConnection();
@@ -81,4 +108,10 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 	public void setURI(String uRI) {
 		URI = uRI;
 	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
+
+	}
+
 }

@@ -3,6 +3,10 @@ package ofs.messaging;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import com.rabbitmq.client.Envelope;
 
 import ofs.messaging.Client.Channel;
@@ -21,9 +25,13 @@ public class testConsumer {
 
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws NamingException {
 
-		RabbitMQConnection con = new RabbitMQConnection("localhost", 5673);
+		// RabbitMQConnection con = new RabbitMQConnection("localhost", 5673);
+
+		Context ctx = new InitialContext();
+		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("Connection");
+
 		Channel channelObject = null;
 
 		try {

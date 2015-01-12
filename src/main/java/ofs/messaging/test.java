@@ -9,6 +9,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Impl.MessagePublisher;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
@@ -18,8 +22,10 @@ import ofs.messaging.Client.Impl.RoutingKey;
 
 public class test {
 
-	public static void main(String[] args) {
-		RabbitMQConnection con = new RabbitMQConnection("localhost", 5673);
+	public static void main(String[] args) throws NamingException {
+
+		Context ctx = new InitialContext();
+		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("Connection");
 
 		Channel channelObject = null;
 		Message msg = null;
