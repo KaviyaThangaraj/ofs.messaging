@@ -29,7 +29,7 @@ import ofs.messaging.Client.Impl.RabbitMQConnection;
  */
 public class MessagingContextFactory implements InitialContextFactory {
 
-	private static final String[] defaultConnectionFactoryNames = { "Connection", };
+	private static final String[] defaultConnectionFactoryNames = { "RabbitMQConnection", };
 
 	private String connectionPrefix = "connection.";
 
@@ -100,9 +100,7 @@ public class MessagingContextFactory implements InitialContextFactory {
 			throws URISyntaxException {
 		RabbitMQConnection answer = new RabbitMQConnection();
 		answer.setURI(environment.get(Context.PROVIDER_URL).toString());
-		Properties properties = new Properties();
-		properties.putAll(environment);
-		answer.setProperties(properties);
+
 		return answer;
 	}
 

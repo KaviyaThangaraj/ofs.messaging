@@ -18,8 +18,11 @@ import ofs.messaging.Client.Impl.RabbitMQClient;
 import ofs.messaging.Client.Impl.RabbitMQConnection;
 
 import com.rabbitmq.client.AMQP;
+import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 public class testConsumer {
+
+	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(testConsumer.class);
 
 	public testConsumer() {
 
@@ -30,7 +33,7 @@ public class testConsumer {
 		// RabbitMQConnection con = new RabbitMQConnection("localhost", 5673);
 
 		Context ctx = new InitialContext();
-		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("Connection");
+		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
 		Channel channelObject = null;
 
@@ -56,15 +59,15 @@ public class testConsumer {
 					Message msg;
 					try {
 						msg = (Message) Util.toObject(msgBody);
-						System.out.println("this is my message==>" + msg.getMessageId());
+						log.debug("This is my message Id==>" + msg.getMessageId());
 
 					} catch (ClassNotFoundException e) {
 
-						e.printStackTrace(); // stack trace is used as this is a test harness. this
-												// shoudnt be in any core code
+						log.error("Processing failed", e);
+
 					} catch (IOException e) {
 
-						e.printStackTrace();
+						log.error("Processing failed", e);
 					}
 
 				}

@@ -23,6 +23,7 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 	private Connection connection = null;
 	private Properties properties;
 
+	// /FIXME: check if we can have the connection as a singleton?
 	public RabbitMQConnection() {
 
 	}
@@ -32,7 +33,6 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 
 	}
 
-	// FIXME: User a connection Factory, context factory and inject
 	public RabbitMQConnection(String Host, int Port) {
 
 		if ((Host.trim().length() > 0 && Port > 0)) {
@@ -44,7 +44,6 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 		}
 	}
 
-	@Deprecated
 	public RabbitMQConnection(Context context) throws KeyManagementException,
 			NoSuchAlgorithmException, URISyntaxException {
 
@@ -107,11 +106,6 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 	 */
 	public void setURI(String uRI) {
 		URI = uRI;
-	}
-
-	public void setProperties(Properties properties) {
-		this.properties = properties;
-
 	}
 
 }

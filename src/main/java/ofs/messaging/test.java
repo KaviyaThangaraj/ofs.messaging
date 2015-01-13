@@ -13,6 +13,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
+
 import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Impl.MessagePublisher;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
@@ -22,10 +24,14 @@ import ofs.messaging.Client.Impl.RoutingKey;
 
 public class test {
 
+	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(test.class);
+
 	public static void main(String[] args) throws NamingException {
 
 		Context ctx = new InitialContext();
-		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("Connection");
+		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
+
+		log.debug("start of producer");
 
 		Channel channelObject = null;
 		Message msg = null;
@@ -58,7 +64,7 @@ public class test {
 
 			final RoutingKey r = new RoutingKey("GMO", dispatchEventId);
 			String routingKey = r.getRoutingKey().toUpperCase();
-			System.out.println(routingKey);
+			log.debug("Routing key ==>" + routingKey);
 
 			long startTime = System.currentTimeMillis();
 
@@ -75,10 +81,10 @@ public class test {
 
 			clientNew.waitForScheduledTasksToComplete(20, TimeUnit.SECONDS);
 
-			System.out.println("done");
+			log.debug("Completed...");
 
 			long endTime = System.currentTimeMillis();
-			System.out.println((endTime - startTime));
+			log.debug("Total duration is:" + Long.toString((endTime - startTime)));
 			channelObject.close();
 			con.close();
 

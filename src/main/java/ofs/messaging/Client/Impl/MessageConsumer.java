@@ -91,7 +91,7 @@ public class MessageConsumer implements Runnable {
 	public void run() {
 
 		try {
-			System.out.println("inside run");
+
 			channel.basicConsume(queueName, callback);
 
 		} catch (IOException e) {

@@ -37,11 +37,7 @@ public class DataStore implements Serializable {
 	public Map<String, String> getRegistrationData() {
 
 		return DataStore.ClientRegistration;
-		/*
-		 * for (String key : EventRegistration.keySet()) {
-		 * 
-		 * System.out.println(key + " - " + EventRegistration.get(key)); System.out.println(); }
-		 */
+
 	}
 
 	public void addClient(String clientId, String clientName) {
