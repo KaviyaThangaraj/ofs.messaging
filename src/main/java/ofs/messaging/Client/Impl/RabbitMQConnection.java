@@ -8,9 +8,9 @@ import java.util.Properties;
 
 import javax.naming.Context;
 
-import ofs.messaging.Client.MessagingContext;
-import ofs.messaging.Client.MessagingContextFactory;
 import ofs.messaging.Client.Exceptions.ConnectionFailedException;
+import ofs.messaging.jndi.MessagingContext;
+import ofs.messaging.jndi.MessagingContextFactory;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;

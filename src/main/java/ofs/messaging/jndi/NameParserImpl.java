@@ -1,4 +1,4 @@
-package ofs.messaging.Client;
+package ofs.messaging.jndi;
 
 import javax.naming.CompositeName;
 import javax.naming.Name;

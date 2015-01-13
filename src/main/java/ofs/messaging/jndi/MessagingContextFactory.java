@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ofs.messaging.Client;
+package ofs.messaging.jndi;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;

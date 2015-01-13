@@ -1,9 +1,12 @@
 package ofs.messaging;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +16,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import com.couchbase.client.CouchbaseClient;
+import com.couchbase.client.deps.com.fasterxml.jackson.databind.Module.SetupContext;
 import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 import ofs.messaging.Client.Channel;
@@ -35,6 +40,7 @@ public class test {
 
 		Channel channelObject = null;
 		Message msg = null;
+		CouchbaseClient cbClient = null;
 
 		try {
 
@@ -47,6 +53,8 @@ public class test {
 
 			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS",
 					"OFS Client description");
+
+			cbClient = new test().setup();
 
 			// registering the client to publish, providing the event type for the messages. as long
 			// as we pass the event id it should be ok
@@ -75,7 +83,9 @@ public class test {
 				payload.setbData(data);
 				msg = new Message(clientId, payload);
 
-				clientNew.publish(new MessagePublisher(channelObject, exchangeId, r, msg));
+				MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
+				clientNew.publish(mp);
+				publish(mp, cbClient);
 
 			}
 
@@ -94,5 +104,27 @@ public class test {
 		} finally {
 
 		}
+	}
+
+	private static void publish(MessagePublisher mp, CouchbaseClient cbClient) {
+		cbClient.set(mp.getExchangeId() + "-" + mp.getRoutingKey(), mp.getMessage());
+	}
+
+	public CouchbaseClient setup() throws InterruptedException, ExecutionException {
+		ArrayList<URI> nodes = new ArrayList<URI>();
+
+		// Add one or more nodes of your cluster (exchange the IP with yours)
+		nodes.add(URI.create("http://127.0.0.1:8091/pools"));
+
+		// Try to connect to the client
+		CouchbaseClient client = null;
+		try {
+			client = new CouchbaseClient(nodes, "default", "");
+		} catch (Exception e) {
+			System.err.println("Error connecting to Couchbase: " + e.getMessage());
+			System.exit(1);
+		}
+
+		return client;
 	}
 }
