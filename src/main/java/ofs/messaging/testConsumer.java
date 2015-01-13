@@ -81,7 +81,7 @@ public class testConsumer {
 
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			log.error("Consumer failed", e);
 		}
 	}
 }
