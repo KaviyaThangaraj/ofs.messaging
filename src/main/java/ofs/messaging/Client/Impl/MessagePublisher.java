@@ -3,6 +3,8 @@ package ofs.messaging.Client.Impl;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.configuration.ConfigurationException;
+
 import com.google.gson.Gson;
 import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
@@ -103,6 +105,8 @@ public class MessagePublisher implements Runnable {
 				} catch (ExecutionException e) {
 
 					log.error("Storing failed ", e);
+				} catch (ConfigurationException e) {
+					log.error("Storing failed ", e);
 				}
 			}
 		} catch (IOException e) {
@@ -114,7 +118,7 @@ public class MessagePublisher implements Runnable {
 	}
 
 	public void storeMessage(MessagePublisher messagePublisher) throws InterruptedException,
-			ExecutionException {
+			ExecutionException, ConfigurationException {
 
 		Gson gson = new Gson();
 		Document doc = new Document(messagePublisher.getMessage().getMessageId(),

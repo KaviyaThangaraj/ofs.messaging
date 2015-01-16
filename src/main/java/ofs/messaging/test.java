@@ -82,14 +82,12 @@ public class test {
 				Payload payload = new Payload();
 				payload.setPayLoadFormat(PayloadFormat.JSON);
 				payload.setData(new String(data));
-				// payload.setbData(data);
 
 				msg = new Message(clientId, payload, isRedundant = isRedundant ? false : true);
 				log.debug(new Boolean(isRedundant).toString());
 
 				MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
 				clientNew.publish(mp);
-				// publish(mp, cbClient);
 
 			}
 

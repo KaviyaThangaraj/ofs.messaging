@@ -3,6 +3,8 @@ package ofs.messaging.Client;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.configuration.ConfigurationException;
+
 import ofs.messaging.Message;
 import ofs.messaging.test;
 import ofs.messaging.Client.Exceptions.MessageDeliveryFailedException;
@@ -60,11 +62,15 @@ public abstract class MessageHandler extends DefaultConsumer implements Handler 
 
 			log.error("Processing or Ack failed", e);
 			throw new MessageDeliveryFailedException("Processing/ or Ack Failed", e);
+		} catch (ConfigurationException e) {
+			log.error("Processing or Ack failed", e);
+			throw new MessageDeliveryFailedException("Processing/ or Ack Failed", e);
 		}
 
 	}
 
-	private void removeMsg(String msgId) throws InterruptedException, ExecutionException {
+	private void removeMsg(String msgId) throws InterruptedException, ExecutionException,
+			ConfigurationException {
 
 		if (cbClient == null) {
 			cbClient = RedundancyManager.getInstance();

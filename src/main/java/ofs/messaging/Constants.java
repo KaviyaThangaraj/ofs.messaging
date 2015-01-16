@@ -15,5 +15,7 @@ public class Constants {
 
 	public static final int MAX_TIME_TO_LIVE_IN_DAYS = 0;
 	public static final String PREFIX = "OFS";
+	public static final String SEPERATOR = "/";
+	public static final String COLON = ":";
 
 }
