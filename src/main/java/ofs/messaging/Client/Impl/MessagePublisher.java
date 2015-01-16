@@ -1,9 +1,13 @@
 package ofs.messaging.Client.Impl;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
+import com.google.gson.Gson;
 import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
+import ofs.messaging.Document;
+import ofs.messaging.DocumentType;
 import ofs.messaging.Message;
 import ofs.messaging.Util;
 import ofs.messaging.Client.Channel;
@@ -90,8 +94,17 @@ public class MessagePublisher implements Runnable {
 
 			byte[] bytes = Util.toByteArray(this.Message);
 			channel.basicPublish(exchangeId, this.routingKey.getRoutingKey().toUpperCase(), bytes);
-			// log.trace(Marker, msg);("Messag {}","a");
+			if (this.Message.isRedundant()) {
+				try {
+					storeMessage(this);
+				} catch (InterruptedException e) {
+					log.error("Storing failed ", e);
+					e.printStackTrace();
+				} catch (ExecutionException e) {
 
+					log.error("Storing failed ", e);
+				}
+			}
 		} catch (IOException e) {
 
 			new MessagePublishingFailedException("publishing this message with MessageId="
@@ -99,4 +112,17 @@ public class MessagePublisher implements Runnable {
 		}
 
 	}
+
+	public void storeMessage(MessagePublisher messagePublisher) throws InterruptedException,
+			ExecutionException {
+
+		Gson gson = new Gson();
+		Document doc = new Document(messagePublisher.getMessage().getMessageId(),
+				DocumentType.MESSAGE, messagePublisher.routingKey.getRoutingKeyId().toString(),
+				messagePublisher.getMessage());
+		RedundancyManager.getInstance().set(doc.getId(), gson.toJson(doc)).get();
+
+		log.debug("Storing message " + messagePublisher.getMessage().getMessageId());
+	}
+
 }

@@ -35,6 +35,7 @@ public class test {
 
 	public static void main(String[] args) throws NamingException {
 
+		// creating a context - use the jndi proeprties file for url and initial context factory
 		Context ctx = new InitialContext();
 		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
@@ -42,7 +43,7 @@ public class test {
 
 		Channel channelObject = null;
 		Message msg = null;
-		CouchbaseClient cbClient = null;
+		boolean isRedundant = true;
 
 		try {
 
@@ -55,8 +56,6 @@ public class test {
 
 			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS",
 					"OFS Client description");
-
-			cbClient = new test().setup();
 
 			// registering the client to publish, providing the event type for the messages. as long
 			// as we pass the event id it should be ok
@@ -84,11 +83,13 @@ public class test {
 				payload.setPayLoadFormat(PayloadFormat.JSON);
 				payload.setData(new String(data));
 				// payload.setbData(data);
-				msg = new Message(clientId, payload);
+
+				msg = new Message(clientId, payload, isRedundant = isRedundant ? false : true);
+				log.debug(new Boolean(isRedundant).toString());
 
 				MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
 				clientNew.publish(mp);
-				publish(mp, cbClient);
+				// publish(mp, cbClient);
 
 			}
 
@@ -107,34 +108,5 @@ public class test {
 		} finally {
 
 		}
-	}
-
-	private static void publish(MessagePublisher mp, CouchbaseClient cbClient)
-			throws InterruptedException, ExecutionException {
-		Gson gson = new Gson();
-		Document doc = new Document(mp.getMessage().getMessageId(), DocumentType.MESSAGE, mp
-				.getRoutingKey().getRoutingKeyId().toString(), mp.getMessage());
-		cbClient.set(doc.getId(), gson.toJson(doc)).get();
-
-		i++;
-		log.debug(Integer.toString(i));
-	}
-
-	public CouchbaseClient setup() throws InterruptedException, ExecutionException {
-		ArrayList<URI> nodes = new ArrayList<URI>();
-
-		// Add one or more nodes of your cluster (exchange the IP with yours)
-		nodes.add(URI.create("http://127.0.0.1:8091/pools"));
-
-		// Try to connect to the client
-		CouchbaseClient client = null;
-		try {
-			client = new CouchbaseClient(nodes, "Messaging", "");
-		} catch (Exception e) {
-			System.err.println("Error connecting to Couchbase: " + e.getMessage());
-			System.exit(1);
-		}
-
-		return client;
 	}
 }

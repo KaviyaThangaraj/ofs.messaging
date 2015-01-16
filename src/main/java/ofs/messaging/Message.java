@@ -53,6 +53,14 @@ public class Message implements Serializable {
 
 	}
 
+	public Message(String clientId, Payload payload, boolean isRedundant) {
+
+		this.clientId = clientId;
+		this.MessageId = generateMessageId();
+		this.payload = payload;
+		this.isRedundant = isRedundant;
+	}
+
 	/**
 	 * @return the messageId
 	 */

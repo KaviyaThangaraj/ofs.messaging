@@ -7,6 +7,7 @@ import ofs.messaging.Message;
 import ofs.messaging.test;
 import ofs.messaging.Client.Exceptions.MessageDeliveryFailedException;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
+import ofs.messaging.Client.Impl.RedundancyManager;
 
 import com.couchbase.client.CouchbaseClient;
 import com.rabbitmq.client.AMQP;
@@ -16,19 +17,12 @@ import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 public abstract class MessageHandler extends DefaultConsumer implements Handler {
 	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(MessageHandler.class);
-
+	private static CouchbaseClient cbClient = null;
 	private RabbitMQChannel channel;
-	private CouchbaseClient cbClient;
 
 	public MessageHandler(ofs.messaging.Client.Channel channelObject) {
 		super(((RabbitMQChannel) channelObject).getChannel());
 		this.channel = (RabbitMQChannel) channelObject;
-	}
-
-	public MessageHandler(ofs.messaging.Client.Channel channelObject, CouchbaseClient cbclient) {
-		super(((RabbitMQChannel) channelObject).getChannel());
-		this.channel = (RabbitMQChannel) channelObject;
-		this.cbClient = cbclient;
 	}
 
 	/*
@@ -60,18 +54,23 @@ public abstract class MessageHandler extends DefaultConsumer implements Handler 
 			log.error("Processing or Ack failed", e);
 			throw new MessageDeliveryFailedException("Processing/ or Ack Failed", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Processing or Ack failed", e);
+			throw new MessageDeliveryFailedException("Processing/ or Ack Failed", e);
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			log.error("Processing or Ack failed", e);
+			throw new MessageDeliveryFailedException("Processing/ or Ack Failed", e);
 		}
 
 	}
 
 	private void removeMsg(String msgId) throws InterruptedException, ExecutionException {
 
-		this.cbClient.delete(msgId).get();
-	}
+		if (cbClient == null) {
+			cbClient = RedundancyManager.getInstance();
+		}
 
+		cbClient.delete(msgId).get();
+		log.debug("Message removed successfully :" + msgId);
+	}
 }

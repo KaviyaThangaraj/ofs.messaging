@@ -44,7 +44,6 @@ public class testConsumer {
 		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
 		Channel channelObject = null;
-		CouchbaseClient cbClient = null;
 
 		try {
 			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS CONSUMER",
@@ -60,9 +59,7 @@ public class testConsumer {
 			channelObject.exchangeDeclare(exchangeId);
 			String queueName = "test";
 
-			cbClient = new testConsumer().setup();
-
-			MessageHandler messageHandler = new MessageHandler(channelObject, cbClient) {
+			MessageHandler messageHandler = new MessageHandler(channelObject) {
 
 				@Override
 				public String doProcess(byte[] msgBody) {
@@ -86,24 +83,6 @@ public class testConsumer {
 					return msg.getMessageId();
 				}
 			};
-			/*
-			 * MessageHandler messageHandler = new MessageHandler(channelObject) {
-			 * 
-			 * @Override public String doProcess(byte[] msgBody) {
-			 * 
-			 * Message msg = null; try { msg = (Message) Util.toObject(msgBody);
-			 * log.debug("This is my message Id==>" + msg.getMessageId());
-			 * 
-			 * } catch (ClassNotFoundException e) {
-			 * 
-			 * log.error("Processing failed", e);
-			 * 
-			 * } catch (IOException e) {
-			 * 
-			 * log.error("Processing failed", e); } return msg.getMessageId(); }
-			 * 
-			 * };
-			 */
 
 			clientNew.setHandler(messageHandler);
 			MessageConsumer msgConsumer = new MessageConsumer(channelObject, messageHandler,
@@ -116,21 +95,4 @@ public class testConsumer {
 		}
 	}
 
-	public CouchbaseClient setup() throws InterruptedException, ExecutionException {
-		ArrayList<URI> nodes = new ArrayList<URI>();
-
-		// Add one or more nodes of your cluster (exchange the IP with yours)
-		nodes.add(URI.create("http://127.0.0.1:8091/pools"));
-
-		// Try to connect to the client
-		CouchbaseClient client = null;
-		try {
-			client = new CouchbaseClient(nodes, "Messaging", "");
-		} catch (Exception e) {
-			System.err.println("Error connecting to Couchbase: " + e.getMessage());
-			System.exit(1);
-		}
-
-		return client;
-	}
 }
