@@ -27,6 +27,21 @@ public class RoutingKey {
 		new DataStore().addRoutingKeys(this.routingKeyId.toString(), this.routingKey);
 	}
 
+	/**
+	 * @return the routingKeyId
+	 */
+	public UUID getRoutingKeyId() {
+		return routingKeyId;
+	}
+
+	/**
+	 * @param routingKeyId
+	 *            the routingKeyId to set
+	 */
+	public void setRoutingKeyId(UUID routingKeyId) {
+		this.routingKeyId = routingKeyId;
+	}
+
 	private String generateRoutingKey(String businessunit, String eventId) {
 
 		return businessunit + "." + new DataStore().getEventName(eventId);

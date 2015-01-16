@@ -11,6 +11,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.QueueingConsumer;
+import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 /**
  * 
@@ -22,6 +23,7 @@ import com.rabbitmq.client.QueueingConsumer;
  */
 public class MessageConsumer implements Runnable {
 
+	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(MessageConsumer.class);
 	private RabbitMQChannel channel = null;
 	private DefaultConsumer callback;
 	private String queueName;
@@ -96,6 +98,7 @@ public class MessageConsumer implements Runnable {
 
 		} catch (IOException e) {
 
+			log.error("Message consumption failed inside consumer.java ", e);
 			throw new MessageDeliveryFailedException("Message consumption failed", e);
 		}
 	}

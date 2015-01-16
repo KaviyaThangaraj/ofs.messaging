@@ -65,7 +65,15 @@ public class RabbitMQConnection implements ofs.messaging.Client.Connection {
 		}
 
 		try {
+
+			// set automatic recovery in case of network failures
+			factory.setAutomaticRecoveryEnabled(true);
+
+			// attempt recovery every 10 seconds
+			factory.setNetworkRecoveryInterval(10000);
+
 			connection = factory.newConnection();
+
 			return connection;
 
 		} catch (java.net.ConnectException e) {

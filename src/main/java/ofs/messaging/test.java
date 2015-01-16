@@ -18,6 +18,7 @@ import javax.naming.NamingException;
 
 import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.deps.com.fasterxml.jackson.databind.Module.SetupContext;
+import com.google.gson.Gson;
 import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 import ofs.messaging.Client.Channel;
@@ -30,13 +31,14 @@ import ofs.messaging.Client.Impl.RoutingKey;
 public class test {
 
 	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(test.class);
+	public static int i = 0;
 
 	public static void main(String[] args) throws NamingException {
 
 		Context ctx = new InitialContext();
 		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
-		log.debug("start of producer");
+		log.info("start of producer");
 
 		Channel channelObject = null;
 		Message msg = null;
@@ -66,7 +68,7 @@ public class test {
 			channelObject.createChannel();
 			channelObject.exchangeDeclare(exchangeId);
 
-			Path path = Paths.get("18slide.ppt");
+			Path path = Paths.get("test.json");
 			byte[] data = null;
 			data = Files.readAllBytes(path);
 
@@ -76,11 +78,12 @@ public class test {
 
 			long startTime = System.currentTimeMillis();
 
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < 100; i++) {
 
 				Payload payload = new Payload();
-				payload.setPayLoadFormat(PayloadFormat.BINARY);
-				payload.setbData(data);
+				payload.setPayLoadFormat(PayloadFormat.JSON);
+				payload.setData(new String(data));
+				// payload.setbData(data);
 				msg = new Message(clientId, payload);
 
 				MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
@@ -99,15 +102,22 @@ public class test {
 			con.close();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("App failed", e);
 
 		} finally {
 
 		}
 	}
 
-	private static void publish(MessagePublisher mp, CouchbaseClient cbClient) {
-		cbClient.set(mp.getExchangeId() + "-" + mp.getRoutingKey(), mp.getMessage());
+	private static void publish(MessagePublisher mp, CouchbaseClient cbClient)
+			throws InterruptedException, ExecutionException {
+		Gson gson = new Gson();
+		Document doc = new Document(mp.getMessage().getMessageId(), DocumentType.MESSAGE, mp
+				.getRoutingKey().getRoutingKeyId().toString(), mp.getMessage());
+		cbClient.set(doc.getId(), gson.toJson(doc)).get();
+
+		i++;
+		log.debug(Integer.toString(i));
 	}
 
 	public CouchbaseClient setup() throws InterruptedException, ExecutionException {
@@ -119,7 +129,7 @@ public class test {
 		// Try to connect to the client
 		CouchbaseClient client = null;
 		try {
-			client = new CouchbaseClient(nodes, "default", "");
+			client = new CouchbaseClient(nodes, "Messaging", "");
 		} catch (Exception e) {
 			System.err.println("Error connecting to Couchbase: " + e.getMessage());
 			System.exit(1);

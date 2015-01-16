@@ -9,6 +9,6 @@ package ofs.messaging;
  */
 public enum PayloadFormat {
 
-	TEXT, BINARY, XMLDOCUMENT;
+	TEXT, BINARY, XMLDOCUMENT, JSON;
 
 }

@@ -2,6 +2,8 @@ package ofs.messaging.Client.Impl;
 
 import java.io.IOException;
 
+import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
+
 import ofs.messaging.Message;
 import ofs.messaging.Util;
 import ofs.messaging.Client.Channel;
@@ -9,6 +11,7 @@ import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 
 public class MessagePublisher implements Runnable {
 
+	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(MessagePublisher.class);
 	private Channel channel = null;
 	private String exchangeId;
 	private RoutingKey routingKey;
@@ -87,6 +90,7 @@ public class MessagePublisher implements Runnable {
 
 			byte[] bytes = Util.toByteArray(this.Message);
 			channel.basicPublish(exchangeId, this.routingKey.getRoutingKey().toUpperCase(), bytes);
+			// log.trace(Marker, msg);("Messag {}","a");
 
 		} catch (IOException e) {
 

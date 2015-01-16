@@ -1,12 +1,22 @@
 package ofs.messaging;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import com.couchbase.client.CouchbaseClient;
+import com.google.gson.Gson;
 import com.rabbitmq.client.Envelope;
 
 import ofs.messaging.Client.Channel;
@@ -30,12 +40,11 @@ public class testConsumer {
 
 	public static void main(String[] args) throws NamingException {
 
-		// RabbitMQConnection con = new RabbitMQConnection("localhost", 5673);
-
 		Context ctx = new InitialContext();
 		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
 		Channel channelObject = null;
+		CouchbaseClient cbClient = null;
 
 		try {
 			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS CONSUMER",
@@ -51,12 +60,14 @@ public class testConsumer {
 			channelObject.exchangeDeclare(exchangeId);
 			String queueName = "test";
 
-			MessageHandler messageHandler = new MessageHandler(channelObject) {
+			cbClient = new testConsumer().setup();
+
+			MessageHandler messageHandler = new MessageHandler(channelObject, cbClient) {
 
 				@Override
-				public void doProcess(byte[] msgBody) {
+				public String doProcess(byte[] msgBody) {
 
-					Message msg;
+					Message msg = null;
 					try {
 						msg = (Message) Util.toObject(msgBody);
 						log.debug("This is my message Id==>" + msg.getMessageId());
@@ -68,11 +79,31 @@ public class testConsumer {
 					} catch (IOException e) {
 
 						log.error("Processing failed", e);
+					} catch (Exception e) {
+
+						log.error("Processing failed", e);
 					}
-
+					return msg.getMessageId();
 				}
-
 			};
+			/*
+			 * MessageHandler messageHandler = new MessageHandler(channelObject) {
+			 * 
+			 * @Override public String doProcess(byte[] msgBody) {
+			 * 
+			 * Message msg = null; try { msg = (Message) Util.toObject(msgBody);
+			 * log.debug("This is my message Id==>" + msg.getMessageId());
+			 * 
+			 * } catch (ClassNotFoundException e) {
+			 * 
+			 * log.error("Processing failed", e);
+			 * 
+			 * } catch (IOException e) {
+			 * 
+			 * log.error("Processing failed", e); } return msg.getMessageId(); }
+			 * 
+			 * };
+			 */
 
 			clientNew.setHandler(messageHandler);
 			MessageConsumer msgConsumer = new MessageConsumer(channelObject, messageHandler,
@@ -83,5 +114,23 @@ public class testConsumer {
 
 			log.error("Consumer failed", e);
 		}
+	}
+
+	public CouchbaseClient setup() throws InterruptedException, ExecutionException {
+		ArrayList<URI> nodes = new ArrayList<URI>();
+
+		// Add one or more nodes of your cluster (exchange the IP with yours)
+		nodes.add(URI.create("http://127.0.0.1:8091/pools"));
+
+		// Try to connect to the client
+		CouchbaseClient client = null;
+		try {
+			client = new CouchbaseClient(nodes, "Messaging", "");
+		} catch (Exception e) {
+			System.err.println("Error connecting to Couchbase: " + e.getMessage());
+			System.exit(1);
+		}
+
+		return client;
 	}
 }

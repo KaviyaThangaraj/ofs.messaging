@@ -3,14 +3,19 @@
  */
 package ofs.messaging.Client.Impl;
 
+import ofs.messaging.Client.MessageHandler;
+
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
+import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 /**
  * @author ramanann
  *
  */
 public class HandlerResponse {
+
+	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(HandlerResponse.class);
 
 	private HandlerResponse(ResponseCode responseCode, Envelope envelope,
 			AMQP.BasicProperties properties, byte[] body) {

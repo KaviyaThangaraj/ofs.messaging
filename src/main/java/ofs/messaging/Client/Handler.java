@@ -7,7 +7,7 @@ import com.rabbitmq.client.Envelope;
 
 public interface Handler {
 
-	public abstract void doProcess(byte[] body);
+	public abstract String doProcess(byte[] body);
 
 	public abstract void handleDelivery(String consumerTag, Envelope envelope,
 			AMQP.BasicProperties properties, byte[] body) throws IOException;
