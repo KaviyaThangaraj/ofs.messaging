@@ -5,7 +5,10 @@
 
 package ofs.messaging;
 
+import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
+
 import org.w3c.dom.Document;
+
 import java.io.Serializable;
 
 /**
@@ -62,6 +65,9 @@ public class Payload implements Serializable {
 	 *            the data to set
 	 */
 	public void setData(String data) {
+		if (data == null) {
+			throw new MessagePublishingFailedException();
+		}
 		this.data = data;
 	}
 

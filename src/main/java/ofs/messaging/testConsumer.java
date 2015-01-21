@@ -26,73 +26,81 @@ import ofs.messaging.Client.Impl.MessageConsumer;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
 import ofs.messaging.Client.Impl.RabbitMQClient;
 import ofs.messaging.Client.Impl.RabbitMQConnection;
+import ofs.messaging.Models.ClientRegistration;
+import ofs.messaging.Persistence.PersistenceManager;
 
 import com.rabbitmq.client.AMQP;
 import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
 
 public class testConsumer {
 
-	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(testConsumer.class);
+  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(testConsumer.class);
 
-	public testConsumer() {
+  public testConsumer() {
 
-	}
+  }
 
-	public static void main(String[] args) throws NamingException {
+  public static void main(String[] args) throws NamingException {
 
-		Context ctx = new InitialContext();
-		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
+    Context ctx = new InitialContext();
+    RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
-		Channel channelObject = null;
+    Channel channelObject = null;
 
-		try {
-			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS CONSUMER",
-					"OFS Client Consumer description");
-			// Query the list of all events and subscribe to it. choose an event id. below, we have
-			// assumed that this is the dispatch event
+    try {
+      RabbitMQClient clientNew =
+          new RabbitMQClient().getInstance(new ClientRegistration("GMO OMS",
+              "OFS Client description", "GMO", "69654ef1-5c99-4df6-b427-25427e4d4fdd"));
 
-			String dispatchEventId = ""; // this is the event we need to consume
+      String dispatchEventId = PersistenceManager.listEvents().get(6).getEventId();
+      log.debug(dispatchEventId);
 
-			final String exchangeId = clientNew.registerClient(dispatchEventId);
-			channelObject = new RabbitMQChannel(con.connect());
-			channelObject.createChannel();
-			channelObject.exchangeDeclare(exchangeId);
-			String queueName = "test";
+      String clientId = clientNew.getClientId().toString();
+      final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
 
-			MessageHandler messageHandler = new MessageHandler(channelObject) {
+      if (exchangeId.isEmpty()) {
+        throw new Exception("Exchange Id shouldnt be null. check the client id");
+      }
+      channelObject = new RabbitMQChannel(con.connect());
 
-				@Override
-				public String doProcess(byte[] msgBody) {
+      // this is not required
+      // channelObject.createChannel();
 
-					Message msg = null;
-					try {
-						msg = (Message) Util.toObject(msgBody);
-						log.debug("This is my message Id==>" + msg.getMessageId());
+      String queueName = "test";
 
-					} catch (ClassNotFoundException e) {
+      MessageHandler messageHandler = new MessageHandler(channelObject) {
 
-						log.error("Processing failed", e);
+        @Override
+        public String doProcess(byte[] msgBody) {
 
-					} catch (IOException e) {
+          Message msg = null;
+          try {
+            msg = (Message) Util.toObject(msgBody);
+            log.debug("This is my message Id==>" + msg.getMessageId());
 
-						log.error("Processing failed", e);
-					} catch (Exception e) {
+          } catch (ClassNotFoundException e) {
 
-						log.error("Processing failed", e);
-					}
-					return msg.getMessageId();
-				}
-			};
+            log.error("Processing failed", e);
 
-			clientNew.setHandler(messageHandler);
-			MessageConsumer msgConsumer = new MessageConsumer(channelObject, messageHandler,
-					queueName);
-			clientNew.Consume(msgConsumer);
+          } catch (IOException e) {
 
-		} catch (Exception e) {
+            log.error("Processing failed", e);
+          } catch (Exception e) {
 
-			log.error("Consumer failed", e);
-		}
-	}
+            log.error("Processing failed", e);
+          }
+          return msg.getMessageId();
+        }
+      };
+
+      clientNew.setHandler(messageHandler);
+      MessageConsumer msgConsumer = new MessageConsumer(channelObject, messageHandler, queueName);
+      clientNew.Consume(msgConsumer);
+
+    } catch (Exception e) {
+
+      log.error("Consumer failed", e);
+    }
+  }
 
 }

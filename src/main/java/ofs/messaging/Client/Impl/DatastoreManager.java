@@ -21,16 +21,17 @@ import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
  * @author ramanann
  *
  */
-public class RedundancyManager {
+// /XXX: this class is similar to datastoremanager,except the bucket name. work on cleaning this up
+// later
+public class DatastoreManager {
 
-	public static final OFSPlatformLogger log = OFSPlatformLogger
-			.getLogger(RedundancyManager.class);
+	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(DatastoreManager.class);
 	private static CouchbaseClient couchbaseClient = null;
 
 	/**
 	 * 
 	 */
-	private RedundancyManager() {
+	private DatastoreManager() {
 
 	}
 
@@ -38,7 +39,7 @@ public class RedundancyManager {
 			ConfigurationException {
 
 		if (couchbaseClient == null) {
-			couchbaseClient = new RedundancyManager().setup();
+			couchbaseClient = new DatastoreManager().setup();
 			log.debug("client null, creating");
 			return couchbaseClient;
 		}
@@ -64,11 +65,15 @@ public class RedundancyManager {
 
 		nodes.add(URI.create(url));
 
+		String messagingRedundancyBucketName = config
+				.getString("couchbase.messagingredundancy.bucketname");
 		// Try to connect to the client
 		CouchbaseClient client = null;
 		try {
-			// FIXME: the bucket is hardcoded. modify it as appropriate
-			client = new CouchbaseClient(nodes, "Messaging", "");
+			// FIXME: See if pwd is required and how to do it
+			// FIXME: Bucket needs to exist. can we do something around check exists and if not
+			// create?
+			client = new CouchbaseClient(nodes, messagingRedundancyBucketName, "");
 		} catch (Exception e) {
 			log.error("Error connecting to Couchbase:", e);
 

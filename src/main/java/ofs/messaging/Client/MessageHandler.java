@@ -9,7 +9,7 @@ import ofs.messaging.Message;
 import ofs.messaging.test;
 import ofs.messaging.Client.Exceptions.MessageDeliveryFailedException;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
-import ofs.messaging.Client.Impl.RedundancyManager;
+import ofs.messaging.Client.Impl.DatastoreManager;
 
 import com.couchbase.client.CouchbaseClient;
 import com.rabbitmq.client.AMQP;
@@ -73,7 +73,7 @@ public abstract class MessageHandler extends DefaultConsumer implements Handler 
 			ConfigurationException {
 
 		if (cbClient == null) {
-			cbClient = RedundancyManager.getInstance();
+			cbClient = DatastoreManager.getInstance();
 		}
 
 		cbClient.delete(msgId).get();

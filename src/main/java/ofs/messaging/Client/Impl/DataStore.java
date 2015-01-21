@@ -1,11 +1,19 @@
 /**
  * 
  */
-package ofs.messaging;
+package ofs.messaging.Client.Impl;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import ofs.messaging.Models.SubscriptionList;
+
+import org.apache.commons.configuration.ConfigurationException;
+
+import com.couchbase.client.CouchbaseClient;
+import com.google.gson.Gson;
 
 /**
  * @author Ramanan Natarajan
@@ -26,12 +34,29 @@ public class DataStore implements Serializable {
 	private static HashMap<String, String> EventTable = new HashMap<String, String>();
 	private static HashMap<String, String> RoutingKeyTable = new HashMap<String, String>();
 
-	public DataStore() {
+	private static CouchbaseClient client = null;
 
+	public DataStore() throws ConfigurationException, InterruptedException, ExecutionException {
+
+		try {
+			if (client == null) {
+				client = ConfigurationStoreManager.getInstance();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void addRegistration(String clientId, String eventId) {
+	public void addRegistration(String clientId, String eventId) throws InterruptedException,
+			ExecutionException {
 		DataStore.EventRegistration.put(clientId, eventId);
+
+		new SubscriptionList().addEventRegistration(clientId, eventId);
+		new SubscriptionList().addEventRegistration(clientId, eventId);
+		client.set("EventRegistration",
+				new Gson().toJson(SubscriptionList.getEventRegistrationList())).get();
+
 	}
 
 	public Map<String, String> getRegistrationData() {

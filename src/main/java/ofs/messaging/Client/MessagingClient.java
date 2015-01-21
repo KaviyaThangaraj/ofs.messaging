@@ -3,6 +3,10 @@
  */
 package ofs.messaging.Client;
 
+import java.util.concurrent.ExecutionException;
+
+import org.apache.commons.configuration.ConfigurationException;
+
 import ofs.messaging.Client.Impl.MessageConsumer;
 import ofs.messaging.Client.Impl.MessagePublisher;
 
@@ -12,9 +16,9 @@ import ofs.messaging.Client.Impl.MessagePublisher;
  */
 public interface MessagingClient {
 
-	public String registerClient(String eventId);
 
-	public void Consume(MessageConsumer msgConsumer);
 
-	public void publish(MessagePublisher messagePublisher);
+  public void Consume(MessageConsumer msgConsumer);
+
+  public void publish(MessagePublisher messagePublisher);
 }

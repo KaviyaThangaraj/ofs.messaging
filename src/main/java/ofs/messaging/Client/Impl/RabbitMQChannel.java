@@ -13,9 +13,11 @@ import ofs.messaging.Client.Exceptions.ConnectionFailedException;
 import ofs.messaging.Client.Exceptions.ExchangeCreationException;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.QueueingConsumer;
 
 /**
@@ -59,17 +61,23 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 
 	/**
 	 * @param connection
+	 * @throws IOException
 	 */
-	public RabbitMQChannel(com.rabbitmq.client.Connection connection) {
+	public RabbitMQChannel(com.rabbitmq.client.Connection connection) throws IOException {
 		super();
 		this.connection = connection;
+		if (this.channel == null) {
+			this.channel = this.connection.createChannel();
+		}
 
 	}
 
 	public Channel createChannel() {
 
 		try {
-			this.channel = this.connection.createChannel();
+			if (this.channel == null) {
+				this.channel = this.connection.createChannel();
+			}
 			return this.channel;
 		} catch (IOException e) {
 
@@ -211,6 +219,12 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 					throws IOException {
 
 		return null;
+	}
+
+	public GetResponse basiGet(String queueName, boolean autoAck) throws IOException {
+
+		return this.channel.basicGet(queueName, autoAck);
+
 	}
 
 }

@@ -124,7 +124,7 @@ public class MessagePublisher implements Runnable {
 		Document doc = new Document(messagePublisher.getMessage().getMessageId(),
 				DocumentType.MESSAGE, messagePublisher.routingKey.getRoutingKeyId().toString(),
 				messagePublisher.getMessage());
-		RedundancyManager.getInstance().set(doc.getId(), gson.toJson(doc)).get();
+		DatastoreManager.getInstance().set(doc.getId(), gson.toJson(doc)).get();
 
 		log.debug("Storing message " + messagePublisher.getMessage().getMessageId());
 	}

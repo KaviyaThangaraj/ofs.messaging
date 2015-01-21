@@ -4,8 +4,10 @@
 package ofs.messaging.Client.Impl;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
-import ofs.messaging.DataStore;
+import org.apache.commons.configuration.ConfigurationException;
+
 import ofs.messaging.Util;
 
 /**
@@ -14,45 +16,49 @@ import ofs.messaging.Util;
  */
 public class RoutingKey {
 
-	private UUID routingKeyId;
-	private String routingKey;
+  private UUID routingKeyId;
+  private String routingKey;
 
-	/**
-	 * 
-	 */
-	public RoutingKey(String Businessunit, String EventId) {
+  /**
+   * @throws ExecutionException
+   * @throws InterruptedException
+   * @throws ConfigurationException
+   * 
+   */
+  public RoutingKey(String Businessunit, String EventId) throws ConfigurationException,
+      InterruptedException, ExecutionException {
 
-		this.routingKeyId = Util.getUUID();
-		this.routingKey = generateRoutingKey(Businessunit, EventId);
-		new DataStore().addRoutingKeys(this.routingKeyId.toString(), this.routingKey);
-	}
+    this.routingKeyId = Util.getUUID();
+    this.routingKey = generateRoutingKey(Businessunit, EventId);
+    // new DataStore().addRoutingKeys(this.routingKeyId.toString(), this.routingKey);
+  }
 
-	/**
-	 * @return the routingKeyId
-	 */
-	public UUID getRoutingKeyId() {
-		return routingKeyId;
-	}
+  /**
+   * @return the routingKeyId
+   */
+  public UUID getRoutingKeyId() {
+    return routingKeyId;
+  }
 
-	/**
-	 * @param routingKeyId
-	 *            the routingKeyId to set
-	 */
-	public void setRoutingKeyId(UUID routingKeyId) {
-		this.routingKeyId = routingKeyId;
-	}
+  /**
+   * @param routingKeyId the routingKeyId to set
+   */
+  public void setRoutingKeyId(UUID routingKeyId) {
+    this.routingKeyId = routingKeyId;
+  }
 
-	private String generateRoutingKey(String businessunit, String eventId) {
+  private String generateRoutingKey(String businessunit, String eventId)
+      throws ConfigurationException, InterruptedException, ExecutionException {
 
-		return businessunit + "." + new DataStore().getEventName(eventId);
-	}
+    return businessunit + "." + eventId; // + new DataStore().getEventName(eventId);
+  }
 
-	public String getRoutingKey() {
+  public String getRoutingKey() {
 
-		if (this.routingKey != null) {
-			return this.routingKey;
-		}
-		return null;
+    if (this.routingKey != null) {
+      return this.routingKey;
+    }
+    return null;
 
-	}
+  }
 }

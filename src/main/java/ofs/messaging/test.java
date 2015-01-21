@@ -27,84 +27,96 @@ import ofs.messaging.Client.Impl.RabbitMQChannel;
 import ofs.messaging.Client.Impl.RabbitMQClient;
 import ofs.messaging.Client.Impl.RabbitMQConnection;
 import ofs.messaging.Client.Impl.RoutingKey;
+import ofs.messaging.Models.ClientRegistration;
+import ofs.messaging.Persistence.PersistenceManager;
 
 public class test {
 
-	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(test.class);
-	public static int i = 0;
+  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(test.class);
+  public static int i = 0;
 
-	public static void main(String[] args) throws NamingException {
+  public static void main(String[] args) throws NamingException {
 
-		// creating a context - use the jndi proeprties file for url and initial context factory
-		Context ctx = new InitialContext();
-		RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
+    // creating a context - use the jndi proeprties file for url and initial context factory
+    Context ctx = new InitialContext();
+    RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
-		log.info("start of producer");
+    log.info("start of producer");
 
-		Channel channelObject = null;
-		Message msg = null;
-		boolean isRedundant = true;
+    Channel channelObject = null;
+    Message msg = null;
+    boolean isRedundant = true;
 
-		try {
+    try {
 
-			// creating a new event - this need not be tied to publishing. this is a seperate task
-			// and getting its id
+      // creating a client instance, with client name and description. again, this can be done
+      // long before publishing
 
-			String dispatchEventId = new Event("ORDER DESPATCH").getEventId();
-			// creating a client instance, with client name and description. again, this can be done
-			// long before publishing
+      String dispatchEventId = "69654ef1-5c99-4df6-b427-25427e4d4fdd";// PersistenceManager.listEvents().get(6).getEventId();
+      // log.debug(dispatchEventId);
 
-			RabbitMQClient clientNew = new RabbitMQClient().getInstance("GMO OMS",
-					"OFS Client description");
+      ClientRegistration cr =
+          new ClientRegistration("GMO OMS", "OFS Client description", "GMO", dispatchEventId);
 
-			// registering the client to publish, providing the event type for the messages. as long
-			// as we pass the event id it should be ok
-			final String exchangeId = clientNew.registerClient(dispatchEventId);
+      RabbitMQClient clientNew = new RabbitMQClient().getInstance(cr);
 
-			String clientId = clientNew.getClientId().toString();
-			// creating a channel to connect and declaring the exchange
-			channelObject = new RabbitMQChannel(con.connect());
-			channelObject.createChannel();
-			channelObject.exchangeDeclare(exchangeId);
 
-			Path path = Paths.get("test.json");
-			byte[] data = null;
-			data = Files.readAllBytes(path);
 
-			final RoutingKey r = new RoutingKey("GMO", dispatchEventId);
-			String routingKey = r.getRoutingKey().toUpperCase();
-			log.debug("Routing key ==>" + routingKey);
+      // registering the client to publish, providing the event type for the messages. as long
+      // as we pass the event id it should be ok
 
-			long startTime = System.currentTimeMillis();
+      String clientId = clientNew.getClientId().toString();
+      final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
 
-			for (int i = 0; i < 100; i++) {
+      if (exchangeId.isEmpty()) {
+        throw new Exception("Exchange Id shouldnt be null. check the client id");
 
-				Payload payload = new Payload();
-				payload.setPayLoadFormat(PayloadFormat.JSON);
-				payload.setData(new String(data));
+      }
 
-				msg = new Message(clientId, payload, isRedundant = isRedundant ? false : true);
-				log.debug(new Boolean(isRedundant).toString());
+      // creating a channel to connect and declaring the exchange
+      channelObject = new RabbitMQChannel(con.connect());
+      channelObject.createChannel();
 
-				MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
-				clientNew.publish(mp);
+      channelObject.exchangeDeclare(exchangeId);
 
-			}
+      Path path = Paths.get("test.json");
+      byte[] data = null;
+      data = Files.readAllBytes(path);
 
-			clientNew.waitForScheduledTasksToComplete(20, TimeUnit.SECONDS);
+      final RoutingKey r = new RoutingKey("GMO", dispatchEventId);
+      String routingKey = "test"; // r.getRoutingKey().toUpperCase();
+      log.debug("Routing key ==>" + routingKey);
 
-			log.debug("Completed...");
+      long startTime = System.currentTimeMillis();
 
-			long endTime = System.currentTimeMillis();
-			log.debug("Total duration is:" + Long.toString((endTime - startTime)));
-			channelObject.close();
-			con.close();
+      for (int i = 0; i < 10; i++) {
 
-		} catch (Exception e) {
-			log.error("App failed", e);
+        Payload payload = new Payload();
+        payload.setPayLoadFormat(PayloadFormat.JSON);
+        payload.setData(new String(data));
+        isRedundant = isRedundant ? false : true;
+        msg = new Message(clientId, payload, isRedundant);
+        log.debug(new Boolean(isRedundant).toString());
 
-		} finally {
+        MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
+        clientNew.publish(mp);
 
-		}
-	}
+      }
+
+      // clientNew.waitForScheduledTasksToComplete(20, TimeUnit.SECONDS);
+      //
+      // log.debug("Completed...");
+      //
+      // long endTime = System.currentTimeMillis();
+      // log.debug("Total duration is:" + Long.toString((endTime - startTime)));
+      // channelObject.close();
+      // con.close();
+
+    } catch (Exception e) {
+      log.error("App failed", e);
+
+    } finally {
+      System.exit(0);
+    }
+  }
 }
