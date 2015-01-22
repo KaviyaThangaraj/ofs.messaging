@@ -1,12 +1,15 @@
 /**
  * 
  */
-package ofs.messaging;
+package ofs.messaging.Models;
 
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.configuration.ConfigurationException;
 
+import ofs.messaging.EventCategory;
+import ofs.messaging.EventPriority;
+import ofs.messaging.Util;
 import ofs.messaging.Client.Impl.DataStore;
 import ofs.messaging.Persistence.PersistenceManager;
 

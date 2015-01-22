@@ -17,116 +17,111 @@ import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 
 public class MessagePublisher implements Runnable {
 
-	public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(MessagePublisher.class);
-	private Channel channel = null;
-	private String exchangeId;
-	private RoutingKey routingKey;
-	private Message Message;
+  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(MessagePublisher.class);
+  private Channel channel = null;
+  private String exchangeId;
+  private RoutingKey routingKey;
+  private Message Message;
 
-	public MessagePublisher(Channel channel, String exchangeId, RoutingKey routingKey,
-			Message message) {
-		this.channel = channel;
-		this.exchangeId = exchangeId;
-		this.routingKey = routingKey;
-		this.Message = message;
-	}
+  public MessagePublisher(Channel channel, String exchangeId, RoutingKey routingKey, Message message) {
+    this.channel = channel;
+    this.exchangeId = exchangeId;
+    this.routingKey = routingKey;
+    this.Message = message;
+  }
 
-	/**
-	 * @return the channel
-	 */
-	public Channel getChannel() {
-		return channel;
-	}
+  /**
+   * @return the channel
+   */
+  public Channel getChannel() {
+    return channel;
+  }
 
-	/**
-	 * @param channel
-	 *            the channel to set
-	 */
-	public void setChannel(Channel channel) {
-		this.channel = channel;
-	}
+  /**
+   * @param channel the channel to set
+   */
+  public void setChannel(Channel channel) {
+    this.channel = channel;
+  }
 
-	/**
-	 * @return the exchangeId
-	 */
-	public String getExchangeId() {
-		return exchangeId;
-	}
+  /**
+   * @return the exchangeId
+   */
+  public String getExchangeId() {
+    return exchangeId;
+  }
 
-	/**
-	 * @param exchangeId
-	 *            the exchangeId to set
-	 */
-	public void setExchangeId(String exchangeId) {
-		this.exchangeId = exchangeId;
-	}
+  /**
+   * @param exchangeId the exchangeId to set
+   */
+  public void setExchangeId(String exchangeId) {
+    this.exchangeId = exchangeId;
+  }
 
-	/**
-	 * @return the routingKey
-	 */
-	public RoutingKey getRoutingKey() {
-		return routingKey;
-	}
+  /**
+   * @return the routingKey
+   */
+  public RoutingKey getRoutingKey() {
+    return routingKey;
+  }
 
-	/**
-	 * @param routingKey
-	 *            the routingKey to set
-	 */
-	public void setRoutingKey(RoutingKey routingKey) {
-		this.routingKey = routingKey;
-	}
+  /**
+   * @param routingKey the routingKey to set
+   */
+  public void setRoutingKey(RoutingKey routingKey) {
+    this.routingKey = routingKey;
+  }
 
-	/**
-	 * @return the message
-	 */
-	public Message getMessage() {
-		return Message;
-	}
+  /**
+   * @return the message
+   */
+  public Message getMessage() {
+    return Message;
+  }
 
-	/**
-	 * @param message
-	 *            the message to set
-	 */
-	public void setMessage(Message message) {
-		Message = message;
-	}
+  /**
+   * @param message the message to set
+   */
+  public void setMessage(Message message) {
+    Message = message;
+  }
 
-	public void run() {
-		try {
+  public void run() {
+    try {
 
-			byte[] bytes = Util.toByteArray(this.Message);
-			channel.basicPublish(exchangeId, this.routingKey.getRoutingKey().toUpperCase(), bytes);
-			if (this.Message.isRedundant()) {
-				try {
-					storeMessage(this);
-				} catch (InterruptedException e) {
-					log.error("Storing failed ", e);
-					e.printStackTrace();
-				} catch (ExecutionException e) {
+      byte[] bytes = Util.toByteArray(this.Message);
+      channel.basicPublish(exchangeId, this.routingKey.getRoutingKey().toUpperCase(), bytes);
+      if (this.Message.isRedundant()) {
+        try {
+          storeMessage(this);
+        } catch (InterruptedException e) {
+          log.error("Storing failed ", e);
+          e.printStackTrace();
+        } catch (ExecutionException e) {
 
-					log.error("Storing failed ", e);
-				} catch (ConfigurationException e) {
-					log.error("Storing failed ", e);
-				}
-			}
-		} catch (IOException e) {
+          log.error("Storing failed ", e);
+        } catch (ConfigurationException e) {
+          log.error("Storing failed ", e);
+        }
+      }
+    } catch (IOException e) {
 
-			new MessagePublishingFailedException("publishing this message with MessageId="
-					+ this.Message.getMessageId(), e);
-		}
+      throw new MessagePublishingFailedException("publishing this message with MessageId="
+          + this.Message.getMessageId(), e);
+    }
 
-	}
+  }
 
-	public void storeMessage(MessagePublisher messagePublisher) throws InterruptedException,
-			ExecutionException, ConfigurationException {
+  public void storeMessage(MessagePublisher messagePublisher) throws InterruptedException,
+      ExecutionException, ConfigurationException {
 
-		Gson gson = new Gson();
-		Document doc = new Document(messagePublisher.getMessage().getMessageId(),
-				DocumentType.MESSAGE, messagePublisher.routingKey.getRoutingKeyId().toString(),
-				messagePublisher.getMessage());
-		DatastoreManager.getInstance().set(doc.getId(), gson.toJson(doc)).get();
+    Gson gson = new Gson();
+    Document doc =
+        new Document(messagePublisher.getMessage().getMessageId(), DocumentType.MESSAGE,
+            messagePublisher.routingKey.getRoutingKeyId().toString(), messagePublisher.getMessage());
+    DatastoreManager.getInstance().set(doc.getId(), gson.toJson(doc)).get();
 
-		log.debug("Storing message " + messagePublisher.getMessage().getMessageId());
-	}
+    log.debug("Storing message " + messagePublisher.getMessage().getMessageId());
+  }
 
 }

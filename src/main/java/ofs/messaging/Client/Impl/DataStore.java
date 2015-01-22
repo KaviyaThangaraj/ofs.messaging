@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import ofs.messaging.Models.SubscriptionList;
+import ofs.messaging.Models.SubscriptionRegistration;
 
 import org.apache.commons.configuration.ConfigurationException;
 
@@ -21,78 +21,78 @@ import com.google.gson.Gson;
  */
 public class DataStore implements Serializable {
 
-	/**
+  /**
 	 * 
 	 */
-	private static final long serialVersionUID = 725234008468123739L;
-	/**
+  private static final long serialVersionUID = 725234008468123739L;
+  /**
 	 * 
 	 */
 
-	private static HashMap<String, String> EventRegistration = new HashMap<String, String>();
-	private static HashMap<String, String> ClientRegistration = new HashMap<String, String>();
-	private static HashMap<String, String> EventTable = new HashMap<String, String>();
-	private static HashMap<String, String> RoutingKeyTable = new HashMap<String, String>();
+  private static HashMap<String, String> EventRegistration = new HashMap<String, String>();
+  private static HashMap<String, String> ClientRegistration = new HashMap<String, String>();
+  private static HashMap<String, String> EventTable = new HashMap<String, String>();
+  private static HashMap<String, String> RoutingKeyTable = new HashMap<String, String>();
 
-	private static CouchbaseClient client = null;
+  private static CouchbaseClient client = null;
 
-	public DataStore() throws ConfigurationException, InterruptedException, ExecutionException {
+  public DataStore() throws ConfigurationException, InterruptedException, ExecutionException {
 
-		try {
-			if (client == null) {
-				client = ConfigurationStoreManager.getInstance();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    try {
+      if (client == null) {
+        client = ConfigurationStoreManager.getInstance();
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
-	public void addRegistration(String clientId, String eventId) throws InterruptedException,
-			ExecutionException {
-		DataStore.EventRegistration.put(clientId, eventId);
+  public void addRegistration(String clientId, String eventId) throws InterruptedException,
+      ExecutionException {
+    // DataStore.EventRegistration.put(clientId, eventId);
 
-		new SubscriptionList().addEventRegistration(clientId, eventId);
-		new SubscriptionList().addEventRegistration(clientId, eventId);
-		client.set("EventRegistration",
-				new Gson().toJson(SubscriptionList.getEventRegistrationList())).get();
+    // new SubscriptionRegistration().addEventRegistration(clientId, eventId);
+    // new SubscriptionRegistration().addEventRegistration(clientId, eventId);
+    // client.set("EventRegistration",
+    // new Gson().toJson(SubscriptionRegistration.getEventRegistrationList())).get();
 
-	}
+  }
 
-	public Map<String, String> getRegistrationData() {
+  public Map<String, String> getRegistrationData() {
 
-		return DataStore.ClientRegistration;
+    return DataStore.ClientRegistration;
 
-	}
+  }
 
-	public void addClient(String clientId, String clientName) {
+  public void addClient(String clientId, String clientName) {
 
-		DataStore.ClientRegistration.put(clientId, clientName);
+    DataStore.ClientRegistration.put(clientId, clientName);
 
-	}
+  }
 
-	public String getClientName(String clientId) {
-		return ClientRegistration.get(clientId);
-	}
+  public String getClientName(String clientId) {
+    return ClientRegistration.get(clientId);
+  }
 
-	public void addEvents(String eventId, String eventName) {
-		DataStore.EventTable.put(eventId, eventName);
+  public void addEvents(String eventId, String eventName) {
+    DataStore.EventTable.put(eventId, eventName);
 
-	}
+  }
 
-	public String getEventName(String eventId) {
+  public String getEventName(String eventId) {
 
-		return EventTable.get(eventId).replace(" ", ".");
-	}
+    return EventTable.get(eventId).replace(" ", ".");
+  }
 
-	public void addRoutingKeys(String routingKeyId, String routingKey) {
-		DataStore.RoutingKeyTable.put(routingKeyId, routingKey);
+  public void addRoutingKeys(String routingKeyId, String routingKey) {
+    DataStore.RoutingKeyTable.put(routingKeyId, routingKey);
 
-	}
+  }
 
-	public Map<String, String> getAvailableRoutingKeys() {
+  public Map<String, String> getAvailableRoutingKeys() {
 
-		return DataStore.RoutingKeyTable;
-	}
+    return DataStore.RoutingKeyTable;
+  }
 
 }

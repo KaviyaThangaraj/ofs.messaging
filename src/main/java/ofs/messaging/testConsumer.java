@@ -27,6 +27,7 @@ import ofs.messaging.Client.Impl.RabbitMQChannel;
 import ofs.messaging.Client.Impl.RabbitMQClient;
 import ofs.messaging.Client.Impl.RabbitMQConnection;
 import ofs.messaging.Models.ClientRegistration;
+import ofs.messaging.Models.SubscriptionRegistration;
 import ofs.messaging.Persistence.PersistenceManager;
 
 import com.rabbitmq.client.AMQP;
@@ -46,27 +47,30 @@ public class testConsumer {
     RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
     Channel channelObject = null;
+    String dispatchEventId = PersistenceManager.listEvents().get(6).getEventId();
+    log.debug(dispatchEventId);
 
     try {
-      RabbitMQClient clientNew =
-          new RabbitMQClient().getInstance(new ClientRegistration("GMO OMS",
-              "OFS Client description", "GMO", "69654ef1-5c99-4df6-b427-25427e4d4fdd"));
 
-      String dispatchEventId = PersistenceManager.listEvents().get(6).getEventId();
-      log.debug(dispatchEventId);
+      // creating the client and registering an event - for subscription?
+      RabbitMQClient clientNew =
+          new RabbitMQClient().getInstance(new SubscriptionRegistration("GMO OMS",
+              "OFS Client description", "GMO", dispatchEventId));
+
+
 
       String clientId = clientNew.getClientId().toString();
-      final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
 
-      if (exchangeId.isEmpty()) {
-        throw new Exception("Exchange Id shouldnt be null. check the client id");
-      }
+      log.debug(clientId);
+
+
       channelObject = new RabbitMQChannel(con.connect());
 
-      // this is not required
-      // channelObject.createChannel();
 
-      String queueName = "test";
+
+      String queueName = PersistenceManager.getQueueFromClientId(clientId);
+      // string queueName is yet to be bound, hardcoding it now
+      queueName = "test";
 
       MessageHandler messageHandler = new MessageHandler(channelObject) {
 
@@ -102,5 +106,4 @@ public class testConsumer {
       log.error("Consumer failed", e);
     }
   }
-
 }

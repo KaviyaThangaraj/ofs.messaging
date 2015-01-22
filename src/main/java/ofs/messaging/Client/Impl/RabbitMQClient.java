@@ -10,6 +10,8 @@ import ofs.messaging.Client.MessageHandler;
 import ofs.messaging.Client.MessagingClient;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 import ofs.messaging.Models.ClientRegistration;
+import ofs.messaging.Models.Registration;
+import ofs.messaging.Models.SubscriptionRegistration;
 
 import java.nio.channels.InterruptedByTimeoutException;
 import java.util.UUID;
@@ -39,8 +41,7 @@ public class RabbitMQClient implements MessagingClient {
    * clientId and register and return back the exchange to which it has to be published
    */
 
-  private UUID clientId;
-  private Object cientId;
+  private String clientId;
 
   public RabbitMQClient() {
 
@@ -50,14 +51,19 @@ public class RabbitMQClient implements MessagingClient {
 	 * 
 	 */
   // FIXME: see what the various arguments for this and add appropriately
-  public RabbitMQClient(ClientRegistration clientRegistration) {
-    this.clientName = clientRegistration.getClientName();
-    this.description = clientRegistration.getClientDescription();
-    this.clientId = clientRegistration.getClientRegistrationId();
+  public RabbitMQClient(ClientRegistration registration) {
+    this.clientName = registration.getClientName();
+    this.description = registration.getClientDescription();
+    this.clientId = registration.getClientRegistrationId();
 
   }
 
 
+  public RabbitMQClient(SubscriptionRegistration registration) {
+    this.clientName = registration.getClientName();
+    this.description = registration.getClientDescription();
+    this.clientId = registration.getClientSubscriptionId();
+  }
 
   /*
    * (non-Javadoc)
@@ -76,20 +82,8 @@ public class RabbitMQClient implements MessagingClient {
   /**
    * @return the clientId
    */
-  public UUID getClientId() {
+  public String getClientId() {
     return clientId;
-  }
-
-  private String getClientName(String clientId) throws ConfigurationException,
-      InterruptedException, ExecutionException {
-
-    /*
-     * FIXME, get the name from the current object. this has to be modified to take it from the
-     * store
-     */
-
-    return new DataStore().getClientName(clientId);
-
   }
 
   /**
@@ -106,9 +100,19 @@ public class RabbitMQClient implements MessagingClient {
     return handler;
   }
 
-  public RabbitMQClient getInstance(ClientRegistration clientRegistration) {
+  public RabbitMQClient getInstance(Object obj) {
 
-    RabbitMQClient client = new RabbitMQClient(clientRegistration);
+
+    RabbitMQClient client = null;
+
+
+    if (obj instanceof ofs.messaging.Models.ClientRegistration) {
+      client = new RabbitMQClient((ClientRegistration) obj);
+    }
+    if (obj instanceof ofs.messaging.Models.SubscriptionRegistration) {
+      client = new RabbitMQClient((SubscriptionRegistration) obj);
+    }
+
 
     if (client.executorService == null) {
       // We want at least 4 threads, even if we only have 2 CPUS.
