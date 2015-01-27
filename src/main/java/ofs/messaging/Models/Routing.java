@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ofs.messaging.Client.Impl;
+package ofs.messaging.Models;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -9,14 +9,15 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.configuration.ConfigurationException;
 
 import ofs.messaging.Util;
+import ofs.messaging.Persistence.PersistenceManager;
 
 /**
  * @author Ramanan Natarajan
  *
  */
-public class RoutingKey {
+public class Routing {
 
-  private UUID routingKeyId;
+  private String routingKeyId;
   private String routingKey;
 
   /**
@@ -25,32 +26,33 @@ public class RoutingKey {
    * @throws ConfigurationException
    * 
    */
-  public RoutingKey(String Businessunit, String EventId) throws ConfigurationException,
+  public Routing(String Businessunit, String EventId) throws ConfigurationException,
       InterruptedException, ExecutionException {
 
-    this.routingKeyId = Util.getUUID();
+    // XXX: is this key id really required?
+    this.routingKeyId = Util.getUUID().toString();
     this.routingKey = generateRoutingKey(Businessunit, EventId);
-    // new DataStore().addRoutingKeys(this.routingKeyId.toString(), this.routingKey);
+
   }
 
   /**
    * @return the routingKeyId
    */
-  public UUID getRoutingKeyId() {
+  public String getRoutingKeyId() {
     return routingKeyId;
   }
 
   /**
    * @param routingKeyId the routingKeyId to set
    */
-  public void setRoutingKeyId(UUID routingKeyId) {
+  public void setRoutingKeyId(String routingKeyId) {
     this.routingKeyId = routingKeyId;
   }
 
   private String generateRoutingKey(String businessunit, String eventId)
       throws ConfigurationException, InterruptedException, ExecutionException {
 
-    return businessunit + "." + eventId; // + new DataStore().getEventName(eventId);
+    return businessunit.replace(" ", "-") + "." + eventId;
   }
 
   public String getRoutingKey() {
@@ -60,5 +62,11 @@ public class RoutingKey {
     }
     return null;
 
+  }
+
+  public static String getRoutingKey(String clientId) throws ConfigurationException,
+      InterruptedException, ExecutionException {
+    ClientRegistration cr = PersistenceManager.getPublishingClientFromClientId(clientId);
+    return new Routing(cr.getBusinessUnit(), cr.getEventId()).getRoutingKey();
   }
 }

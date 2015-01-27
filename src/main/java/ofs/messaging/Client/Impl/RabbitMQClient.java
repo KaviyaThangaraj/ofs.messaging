@@ -4,13 +4,13 @@
 package ofs.messaging.Client.Impl;
 
 import ofs.messaging.Util;
+import ofs.messaging.testConsumer;
 import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Handler;
 import ofs.messaging.Client.MessageHandler;
 import ofs.messaging.Client.MessagingClient;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 import ofs.messaging.Models.ClientRegistration;
-import ofs.messaging.Models.Registration;
 import ofs.messaging.Models.SubscriptionRegistration;
 
 import java.nio.channels.InterruptedByTimeoutException;
@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Ramanan Natarajan
@@ -30,7 +32,8 @@ import org.apache.commons.configuration.ConfigurationException;
  */
 public class RabbitMQClient implements MessagingClient {
 
-  @SuppressWarnings("unused")
+  public static final Logger log = LoggerFactory.getLogger(MessagingClient.class);
+
   private String description;
   private String clientName;
   private ExecutorService executorService;
@@ -50,8 +53,8 @@ public class RabbitMQClient implements MessagingClient {
   /**
 	 * 
 	 */
-  // FIXME: see what the various arguments for this and add appropriately
-  public RabbitMQClient(ClientRegistration registration) {
+
+  private RabbitMQClient(ClientRegistration registration) {
     this.clientName = registration.getClientName();
     this.description = registration.getClientDescription();
     this.clientId = registration.getClientRegistrationId();
@@ -59,10 +62,26 @@ public class RabbitMQClient implements MessagingClient {
   }
 
 
-  public RabbitMQClient(SubscriptionRegistration registration) {
+  private RabbitMQClient(SubscriptionRegistration registration) {
     this.clientName = registration.getClientName();
     this.description = registration.getClientDescription();
     this.clientId = registration.getClientSubscriptionId();
+
+    log.debug("Registration client id is------------>" + this.clientId);
+  }
+
+  private RabbitMQClient getRabbitMQClient(Object obj) {
+
+    RabbitMQClient client = null;
+    if (obj instanceof ClientRegistration) {
+      client = new RabbitMQClient((ClientRegistration) obj);
+
+
+    } else if ((obj instanceof SubscriptionRegistration)) {
+      client = new RabbitMQClient((SubscriptionRegistration) obj);
+    }
+
+    return client;
   }
 
   /*
@@ -100,18 +119,11 @@ public class RabbitMQClient implements MessagingClient {
     return handler;
   }
 
-  public RabbitMQClient getInstance(Object obj) {
+  public RabbitMQClient getInstance(Object obj) throws ClassNotFoundException {
 
 
-    RabbitMQClient client = null;
+    RabbitMQClient client = getRabbitMQClient(obj);
 
-
-    if (obj instanceof ofs.messaging.Models.ClientRegistration) {
-      client = new RabbitMQClient((ClientRegistration) obj);
-    }
-    if (obj instanceof ofs.messaging.Models.SubscriptionRegistration) {
-      client = new RabbitMQClient((SubscriptionRegistration) obj);
-    }
 
 
     if (client.executorService == null) {
@@ -144,47 +156,7 @@ public class RabbitMQClient implements MessagingClient {
 
   }
 
-  /**
-   * @param eventId this takes in an eventId and associates the client to the event
-   * @throws ExecutionException
-   * @throws InterruptedException
-   * @throws ConfigurationException
-   */
 
-  // public String registerClient(String eventId) throws ConfigurationException,
-  // InterruptedException,
-  // ExecutionException {
-  //
-  //
-  //
-  // this.clientId = Util.getUUID();
-  //
-  // new DataStore().addRegistration(this.clientId.toString(), eventId.toString());
-  // // this needs to be stored later to fetch for registration
-  // new DataStore().addClient(this.clientId.toString(), this.clientName);
-  // // return a generated exchange id
-  //
-  // return (getClientName(clientId.toString()) + "." + eventId);
-  //
-  //
-  //
-  // }
-
-  // Future method to be refactored when we will have API's
-  // public String registerClient(String clientId, String eventId) throws ConfigurationException,
-  // InterruptedException, ExecutionException {
-  //
-  // // FIXME:think later on how to create without many steps!
-  // // new RabbitMQClient(clientName, description);;
-  // this.clientId = UUID.fromString(clientId);
-  //
-  // // To register, for now add to a map? later move this to a datastore
-  //
-  // DataStore d = new DataStore();
-  // d.addRegistration(this.clientId.toString(), eventId);
-  // // return (this.clientId.toString() + eventId);
-  // return (getClientName(clientId) + "." + eventId);
-  // }
 
   /**
    * @param executorService the executorService to set

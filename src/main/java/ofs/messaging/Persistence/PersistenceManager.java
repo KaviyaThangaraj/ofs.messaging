@@ -4,10 +4,11 @@ package ofs.messaging.Persistence;
 import java.nio.file.Paths;
 import java.util.List;
 
-import ofs.messaging.test;
+import ofs.messaging.testPublishingWithNewClientRegistration;
+import ofs.messaging.Client.Exceptions.ClientIdDoesNotExistException;
 import ofs.messaging.Models.ClientRegistration;
 import ofs.messaging.Models.Event;
-import ofs.messaging.Models.Registration;
+
 import ofs.messaging.Models.SubscriptionRegistration;
 
 import org.hibernate.Query;
@@ -15,11 +16,12 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
-import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PersistenceManager {
 
-  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(PersistenceManager.class);
+  public static final Logger log = LoggerFactory.getLogger(PersistenceManager.class);
 
   private PersistenceManager() {
 
@@ -45,12 +47,24 @@ public class PersistenceManager {
 
   }
 
-  public static void saveClientRegistration(Registration clientRegistration) {
+  public static void saveClientRegistration(ClientRegistration clientRegistration) {
 
 
     Session session = initHibernate();
     Transaction tx = session.beginTransaction();
     session.saveOrUpdate(clientRegistration);
+    tx.commit();
+
+
+
+  }
+
+  public static void saveSubscriptionRegistration(SubscriptionRegistration subscriptionRegistration) {
+
+
+    Session session = initHibernate();
+    Transaction tx = session.beginTransaction();
+    session.saveOrUpdate(subscriptionRegistration);
     tx.commit();
 
   }
@@ -163,7 +177,7 @@ public class PersistenceManager {
     return false;
   }
 
-  public static String getQueueFromClientId(String clientId) {
+  public static String getQueueFromSubscriptionClientId(String clientId) {
 
     Session session = initHibernate();
     Transaction tx = session.beginTransaction();
@@ -172,7 +186,7 @@ public class PersistenceManager {
         session.createQuery("from " + SubscriptionRegistration.class.getName()
             + " as subReg where subReg.clientSubscriptionId=? ");
     q.setParameter(0, clientId);
-    List<ClientRegistration> list = q.list();
+    List<SubscriptionRegistration> list = q.list();
 
     log.debug("Incoming clientID is==>" + clientId);
 
@@ -181,7 +195,7 @@ public class PersistenceManager {
       log.debug("List of Subscription Registration Query came back with " + list.size()
           + " results");
       // assumption is that there can be only one matching record and hence returning the first one!
-      return list.get(0).getExchangeId();
+      return list.get(0).getQueue().toString();
 
     }
     log.debug("List of Subscription Registration Query came back with Empty results");
@@ -196,10 +210,69 @@ public class PersistenceManager {
     // SubscriptionRegistration.class.getName()).executeUpdate();
     // session.createQuery("delete from " + ClientRegistration.class.getName()).executeUpdate();
     // session.createQuery("delete from " + Registration.class.getName()).executeUpdate();
-    session.createSQLQuery("drop table CLIENTREGISTRATION").executeUpdate();
-    session.createSQLQuery("drop table REGISTRATION").executeUpdate();
     session.createSQLQuery("drop table SUBSCRIPTIONREGISTRATION").executeUpdate();
+    // session.createSQLQuery("drop table .NULL.EVENT").executeUpdate();
+    session.createSQLQuery("drop table CLIENTREGISTRATION").executeUpdate();
 
     tx.commit();
+  }
+
+  public static String getRegistrationClientIdFromOtherDetails(String clientId, String businessUnit) {
+
+    Session session = initHibernate();
+    Transaction tx = session.beginTransaction();
+    Query q =
+        session.createQuery("from " + ClientRegistration.class.getName()
+            + " as clReg where clReg.clientName=? and clReg.businessUnit=?");
+    q.setParameter(0, clientId);
+    q.setParameter(1, businessUnit);
+
+    List<ClientRegistration> list = q.list();
+    if (list != null && list.size() == 1) {
+
+      return list.get(0).getClientRegistrationId();
+
+    }
+
+    return null;
+
+  }
+
+  public static ClientRegistration getPublishingClientFromClientId(String clientId) {
+
+    Session session = initHibernate();
+    Transaction tx = session.beginTransaction();
+
+    Query q =
+        session.createQuery("from " + ClientRegistration.class.getName()
+            + " as clReg where clReg.clientRegistrationId=? ");
+    q.setParameter(0, clientId);
+    List<ClientRegistration> list = q.list();
+    if (list != null && list.size() > 0) {
+      return list.get(0);
+    }
+
+    throw new ClientIdDoesNotExistException(
+        "The client Id supplied does not exist. Please verify the input value");
+
+  }
+
+  public static SubscriptionRegistration getSubscriptionClientFromSubscpriptionId(String clientId) {
+
+    Session session = initHibernate();
+    Transaction tx = session.beginTransaction();
+
+    Query q =
+        session.createQuery("from " + SubscriptionRegistration.class.getName()
+            + " as subReg where subReg.clientSubscriptionId=? ");
+    q.setParameter(0, clientId);
+    List<SubscriptionRegistration> list = q.list();
+    if (list != null && list.size() > 0) {
+      return list.get(0);
+    }
+
+    throw new ClientIdDoesNotExistException(
+        "The client Id supplied does not exist. Please verify the input value");
+
   }
 }

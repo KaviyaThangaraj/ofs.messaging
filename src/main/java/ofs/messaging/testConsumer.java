@@ -31,11 +31,12 @@ import ofs.messaging.Models.SubscriptionRegistration;
 import ofs.messaging.Persistence.PersistenceManager;
 
 import com.rabbitmq.client.AMQP;
-import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class testConsumer {
 
-  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(testConsumer.class);
+  public static final Logger log = LoggerFactory.getLogger(testConsumer.class);
 
   public testConsumer() {
 
@@ -47,31 +48,33 @@ public class testConsumer {
     RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
     Channel channelObject = null;
-    String dispatchEventId = PersistenceManager.listEvents().get(6).getEventId();
-    log.debug(dispatchEventId);
+    String eventId = PersistenceManager.listEvents().get(6).getEventId();
+    log.debug("Event id is {}", eventId);
 
     try {
 
       // creating the client and registering an event - for subscription?
       RabbitMQClient clientNew =
-          new RabbitMQClient().getInstance(new SubscriptionRegistration("GMO OMS",
-              "OFS Client description", "GMO", dispatchEventId));
+          new RabbitMQClient().getInstance(new SubscriptionRegistration("GMO OMS Consumer1",
+              "OFS Client description1", "IGHS5", eventId));
 
 
 
       String clientId = clientNew.getClientId().toString();
 
-      log.debug(clientId);
+      log.debug("ClientId is {}" + clientId);
+
 
 
       channelObject = new RabbitMQChannel(con.connect());
 
 
 
-      String queueName = PersistenceManager.getQueueFromClientId(clientId);
+      String queueName = PersistenceManager.getQueueFromSubscriptionClientId(clientId);
       // string queueName is yet to be bound, hardcoding it now
-      queueName = "test";
+      // queueName = "testPublishingWithNewClientRegistration";
 
+      log.debug("Queue name is {}", queueName);
       MessageHandler messageHandler = new MessageHandler(channelObject) {
 
         @Override
@@ -104,6 +107,7 @@ public class testConsumer {
     } catch (Exception e) {
 
       log.error("Consumer failed", e);
+      System.exit(-1);
     }
   }
 }

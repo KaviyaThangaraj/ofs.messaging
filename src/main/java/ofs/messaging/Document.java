@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import ofs.messaging.DocumentType;
 import ofs.messaging.Message;
-import ofs.messaging.Client.Impl.RoutingKey;
+import ofs.messaging.Models.Routing;
 
 /**
  * 

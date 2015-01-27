@@ -22,21 +22,22 @@ import org.hibernate.Transaction;
 import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.deps.com.fasterxml.jackson.databind.Module.SetupContext;
 import com.google.gson.Gson;
-import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Impl.MessagePublisher;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
 import ofs.messaging.Client.Impl.RabbitMQClient;
 import ofs.messaging.Client.Impl.RabbitMQConnection;
-import ofs.messaging.Client.Impl.RoutingKey;
 import ofs.messaging.Models.ClientRegistration;
-import ofs.messaging.Models.Registration;
+import ofs.messaging.Models.Routing;
 import ofs.messaging.Persistence.PersistenceManager;
 
-public class test {
 
-  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(test.class);
+public class testExistingPublishingClient {
+
+  public static final Logger log = LoggerFactory
+      .getLogger(testPublishingWithNewClientRegistration.class);
   public static int i = 0;
 
   public static void main(String[] args) throws NamingException {
@@ -47,7 +48,7 @@ public class test {
     Context ctx = new InitialContext();
     RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
-    log.info("start of producer");
+    log.info("start of producer 1");
 
     Channel channelObject = null;
     Message msg = null;
@@ -55,29 +56,36 @@ public class test {
 
     try {
 
-      // creating a client instance, with client name and description. again, this can be done
-      // long before publishing
-
-      String dispatchEventId = PersistenceManager.listEvents().get(6).getEventId();
-      // log.debug(dispatchEventId);
-
-      Registration cr =
-          new ClientRegistration("GMO OMS", "OFS Client description", "IGHS1", dispatchEventId);
-
-      RabbitMQClient clientNew = new RabbitMQClient().getInstance(cr);
 
 
+      // getting an event id as we want to publish messages for those events
+      String EventId = PersistenceManager.listEvents().get(6).getEventId(); // 6 is dispatch in our
+                                                                            // testPublishingWithNewClientRegistration
+      // 56313dfd-23a1-43ca-bbe0-ee994c4fb851 // db
+      log.debug("Event id is:" + EventId);
 
-      // registering the client to publish, providing the event type for the messages. as long
-      // as we pass the event id it should be ok
 
-      String clientId = clientNew.getClientId().toString();
+      String clientId =
+          PersistenceManager.getRegistrationClientIdFromOtherDetails("GMO OMS", "IGHS5");
+      log.debug("Client id is :" + clientId);
+
+
       final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
 
       if (exchangeId.isEmpty()) {
         throw new Exception("Exchange Id shouldnt be null. check the client id");
 
       }
+      log.debug("Exchange Id is :" + exchangeId);
+
+      String routingKey = Routing.getRoutingKey(clientId);
+      log.debug("Routing is: " + routingKey);
+
+      // System.exit(0);
+
+      RabbitMQClient clientNew =
+          new RabbitMQClient().getInstance(ClientRegistration.getClient(clientId));
+
 
       // creating a channel to connect and declaring the exchange
       channelObject = new RabbitMQChannel(con.connect());
@@ -89,13 +97,13 @@ public class test {
       byte[] data = null;
       data = Files.readAllBytes(path);
 
-      final RoutingKey r = new RoutingKey("GMO", dispatchEventId);
-      String routingKey = "test"; // r.getRoutingKey().toUpperCase();
-      log.debug("Routing key ==>" + routingKey);
+
 
       long startTime = System.currentTimeMillis();
 
-      for (int i = 0; i < 10; i++) {
+
+      // for (int i = 0; i < 10000; i++) {
+      for (;;) {
 
         Payload payload = new Payload();
         payload.setPayLoadFormat(PayloadFormat.JSON);
@@ -104,7 +112,7 @@ public class test {
         msg = new Message(clientId, payload, isRedundant);
         log.debug(new Boolean(isRedundant).toString());
 
-        MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, r, msg);
+        MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, routingKey, msg);
         clientNew.publish(mp);
 
       }

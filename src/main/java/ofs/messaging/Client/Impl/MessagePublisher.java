@@ -6,7 +6,8 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.configuration.ConfigurationException;
 
 import com.google.gson.Gson;
-import com.tesco.ofs.platform.trace.logger.OFSPlatformLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ofs.messaging.Document;
 import ofs.messaging.DocumentType;
@@ -14,16 +15,17 @@ import ofs.messaging.Message;
 import ofs.messaging.Util;
 import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
+import ofs.messaging.Models.Routing;
 
 public class MessagePublisher implements Runnable {
 
-  public static final OFSPlatformLogger log = OFSPlatformLogger.getLogger(MessagePublisher.class);
+  public static final Logger log = LoggerFactory.getLogger(MessagePublisher.class);
   private Channel channel = null;
   private String exchangeId;
-  private RoutingKey routingKey;
+  private String routingKey;
   private Message Message;
 
-  public MessagePublisher(Channel channel, String exchangeId, RoutingKey routingKey, Message message) {
+  public MessagePublisher(Channel channel, String exchangeId, String routingKey, Message message) {
     this.channel = channel;
     this.exchangeId = exchangeId;
     this.routingKey = routingKey;
@@ -61,14 +63,14 @@ public class MessagePublisher implements Runnable {
   /**
    * @return the routingKey
    */
-  public RoutingKey getRoutingKey() {
+  public String getRoutingKey() {
     return routingKey;
   }
 
   /**
    * @param routingKey the routingKey to set
    */
-  public void setRoutingKey(RoutingKey routingKey) {
+  public void setRoutingKey(String routingKey) {
     this.routingKey = routingKey;
   }
 
@@ -90,7 +92,7 @@ public class MessagePublisher implements Runnable {
     try {
 
       byte[] bytes = Util.toByteArray(this.Message);
-      channel.basicPublish(exchangeId, this.routingKey.getRoutingKey().toUpperCase(), bytes);
+      channel.basicPublish(exchangeId, this.routingKey, bytes);
       if (this.Message.isRedundant()) {
         try {
           storeMessage(this);
@@ -118,7 +120,7 @@ public class MessagePublisher implements Runnable {
     Gson gson = new Gson();
     Document doc =
         new Document(messagePublisher.getMessage().getMessageId(), DocumentType.MESSAGE,
-            messagePublisher.routingKey.getRoutingKeyId().toString(), messagePublisher.getMessage());
+            messagePublisher.routingKey, messagePublisher.getMessage());
     DatastoreManager.getInstance().set(doc.getId(), gson.toJson(doc)).get();
 
     log.debug("Storing message " + messagePublisher.getMessage().getMessageId());

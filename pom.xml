@@ -69,13 +69,13 @@
 
 
 
-		<dependency>
-			<groupId>ofs.tesco</groupId>
-			<artifactId>logger.ofs.tesco</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/OFSLogger.jar</systemPath>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>ofs.tesco</groupId> -->
+<!-- 			<artifactId>logger.ofs.tesco</artifactId> -->
+<!-- 			<version>1.0</version> -->
+<!-- 			<scope>system</scope> -->
+<!-- 			<systemPath>${basedir}/lib/OFSLogger.jar</systemPath> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
