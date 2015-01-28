@@ -64,7 +64,7 @@ public class PersistenceManager {
 
     Session session = initHibernate();
     Transaction tx = session.beginTransaction();
-    session.saveOrUpdate(subscriptionRegistration);
+    session.save(subscriptionRegistration);
     tx.commit();
 
   }

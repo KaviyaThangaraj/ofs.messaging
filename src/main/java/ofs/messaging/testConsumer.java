@@ -55,8 +55,8 @@ public class testConsumer {
 
       // creating the client and registering an event - for subscription?
       RabbitMQClient clientNew =
-          new RabbitMQClient().getInstance(new SubscriptionRegistration("GMO OMS Consumer1",
-              "OFS Client description1", "IGHS5", eventId));
+          new RabbitMQClient().getInstance(new SubscriptionRegistration("GMO OMS Consumer2",
+              "OFS Client description2", "IGHS5", eventId));
 
 
 
@@ -96,7 +96,12 @@ public class testConsumer {
 
             log.error("Processing failed", e);
           }
-          return msg.getMessageId();
+          if (msg != null) {
+            return msg.getMessageId();
+          } else {
+            return null;
+          }
+
         }
       };
 
