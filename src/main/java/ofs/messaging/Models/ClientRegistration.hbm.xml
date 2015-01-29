@@ -4,19 +4,22 @@
 <!-- Generated Jan 22, 2015 12:04:26 AM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="ofs.messaging.Models.ClientRegistration" table="CLIENTREGISTRATION">
-        <id name="eventId" type="java.lang.String">
-            <column name="EVENTID" />
+         <id name="clientRegistrationId" type="java.lang.String">
+            <column name="CLIENTREGISTRATIONID" />
             <generator class="assigned" />
         </id>
+        
+        <property name="eventId" type="java.lang.String">
+            <column name="EVENTID" />
+           
+        </property>
         <property name="clientName" type="java.lang.String">
             <column name="CLIENTNAME" />
         </property>
         <property name="businessUnit" type="java.lang.String">
             <column name="BUSINESSUNIT" />
         </property>
-        <property name="clientRegistrationId" type="java.lang.String">
-            <column name="CLIENTREGISTRATIONID" />
-        </property>
+       
         <property name="clientDescription" type="java.lang.String">
             <column name="CLIENTDESCRIPTION" />
         </property>

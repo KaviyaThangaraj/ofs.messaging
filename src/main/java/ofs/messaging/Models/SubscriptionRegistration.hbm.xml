@@ -14,10 +14,7 @@
             <column name="EVENTID" />
             
         </property>
-        <!-- <id name="eventId" type="java.lang.String">
-            <column name="EVENTID" />
-            <generator class="assigned" />
-        </id> -->
+        
         <property name="clientName" type="java.lang.String">
             <column name="CLIENTNAME" />
         </property>

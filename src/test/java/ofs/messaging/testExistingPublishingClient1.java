@@ -22,8 +22,10 @@ import org.hibernate.Transaction;
 import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.deps.com.fasterxml.jackson.databind.Module.SetupContext;
 import com.google.gson.Gson;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Impl.MessagePublisher;
 import ofs.messaging.Client.Impl.RabbitMQChannel;
@@ -34,13 +36,14 @@ import ofs.messaging.Models.Routing;
 import ofs.messaging.Persistence.PersistenceManager;
 
 
-public class testExistingPublishingClient {
+public class testExistingPublishingClient1 {
 
   public static final Logger log = LoggerFactory
       .getLogger(testPublishingWithNewClientRegistration.class);
   public static int i = 0;
 
   public static void main(String[] args) throws NamingException {
+
 
     // PersistenceManager.cleanUp();
 
@@ -59,39 +62,37 @@ public class testExistingPublishingClient {
 
 
       // getting an event id as we want to publish messages for those events
-      String EventId = PersistenceManager.listEvents().get(6).getEventId(); // 6 is dispatch in our
+      String eventId = PersistenceManager.listEvents().get(6).getEventId(); // 6 is dispatch in our
                                                                             // testPublishingWithNewClientRegistration
-      // 56313dfd-23a1-43ca-bbe0-ee994c4fb851 // db
-      log.debug("Event id is:" + EventId);
+
+      log.debug("Event id is:" + eventId);
 
 
-      String clientId =
-          PersistenceManager.getRegistrationClientIdFromOtherDetails("GMO OMS", "IGHS5");
-      log.debug("Client id is :" + clientId);
+      final ClientRegistration cReg =
+          PersistenceManager.getExangeIdFromOtherClientDetails("CLIENTNAME2", "BU1", eventId);
 
-
-      final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
-
-      if (exchangeId.isEmpty()) {
-        throw new Exception("Exchange Id shouldnt be null. check the client id");
+      if (cReg == null || cReg.getExchangeId().isEmpty()) {
+        throw new Exception("Please check the client id");
 
       }
-      log.debug("Exchange Id is :" + exchangeId);
+      log.debug("Exchange Id is :" + cReg.getExchangeId());
 
-      String routingKey = Routing.getRoutingKey(clientId);
+      String routingKey = Routing.getRoutingKey(cReg.getClientRegistrationId());
       log.debug("Routing is: " + routingKey);
+
 
       // System.exit(0);
 
       RabbitMQClient clientNew =
-          new RabbitMQClient().getInstance(ClientRegistration.getClient(clientId));
+          new RabbitMQClient().getInstance(ClientRegistration.getClient(cReg
+              .getClientRegistrationId()));
 
 
       // creating a channel to connect and declaring the exchange
       channelObject = new RabbitMQChannel(con.connect());
       channelObject.createChannel();
 
-      channelObject.exchangeDeclare(exchangeId);
+      channelObject.exchangeDeclare(cReg.getExchangeId());
 
       Path path = Paths.get("test.json");
       byte[] data = null;
@@ -109,10 +110,11 @@ public class testExistingPublishingClient {
         payload.setPayLoadFormat(PayloadFormat.JSON);
         payload.setData(new String(data));
         isRedundant = isRedundant ? false : true;
-        msg = new Message(clientId, payload, isRedundant);
+        msg = new Message(cReg.getClientRegistrationId(), payload, isRedundant);
         log.debug(new Boolean(isRedundant).toString());
 
-        MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, routingKey, msg);
+        MessagePublisher mp =
+            new MessagePublisher(channelObject, cReg.getExchangeId(), routingKey, msg);
         clientNew.publish(mp);
 
       }

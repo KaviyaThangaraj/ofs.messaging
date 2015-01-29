@@ -42,6 +42,7 @@ public class testPublishingWithNewClientRegistration {
 
   public static void main(String[] args) throws NamingException {
 
+
     // PersistenceManager.cleanUp();
 
     // creating a context - use the jndi proeprties file for url and initial context factory
@@ -59,20 +60,20 @@ public class testPublishingWithNewClientRegistration {
 
 
       // getting an event id as we want to publish messages for those events
-      String EventId = PersistenceManager.listEvents().get(6).getEventId(); // 6 is dispatch in our
+      String eventId = PersistenceManager.listEvents().get(6).getEventId(); // 6 is dispatch in our
                                                                             // testPublishingWithNewClientRegistration
                                                                             // db
-      log.debug(EventId);
+      log.debug(eventId);
 
       ClientRegistration cr =
-          new ClientRegistration("GMO OMS", "OFS Client description", "IGHS5", EventId);
-      // String clientId =
-      // PersistenceManager.getRegistrationClientIdFromOtherDetails("GMO OMS", "IGHS1");
+          new ClientRegistration("CLIENTNAME", "CLIENT DESCRIPTION", "BU1", eventId);
+
 
       String clientId = cr.getClientRegistrationId();
       log.debug(cr.getExchangeId());
 
-      final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
+      final String exchangeId =
+          PersistenceManager.getExangeIdFromClientIdAndEventId(clientId, eventId);
 
       if (exchangeId.isEmpty()) {
         throw new Exception("Exchange Id shouldnt be null. check the client id");
@@ -85,7 +86,7 @@ public class testPublishingWithNewClientRegistration {
       channelObject = new RabbitMQChannel(con.connect());
       channelObject.createChannel();
 
-      channelObject.exchangeDeclare(exchangeId);
+
 
       Path path = Paths.get("test.json");
       byte[] data = null;
@@ -97,7 +98,7 @@ public class testPublishingWithNewClientRegistration {
 
       long startTime = System.currentTimeMillis();
 
-      for (int i = 0; i < 1000; i++) {
+      for (;;) {
 
         Payload payload = new Payload();
         payload.setPayLoadFormat(PayloadFormat.JSON);
@@ -108,6 +109,7 @@ public class testPublishingWithNewClientRegistration {
 
         MessagePublisher mp = new MessagePublisher(channelObject, exchangeId, routingKey, msg);
         clientNew.publish(mp);
+        Thread.sleep(1000);
 
       }
 

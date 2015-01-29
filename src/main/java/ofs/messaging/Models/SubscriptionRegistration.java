@@ -15,7 +15,7 @@ import javax.naming.NamingException;
 import ofs.messaging.Util;
 import ofs.messaging.Client.Exceptions.ClientAlreadySubscribedToThisEventException;
 import ofs.messaging.Client.Exceptions.EventIdDoesNotExistException;
-import ofs.messaging.Client.Impl.QueueHelper;
+import ofs.messaging.Client.Helper.BrokerHelper;
 import ofs.messaging.Persistence.PersistenceManager;
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -89,7 +89,7 @@ public class SubscriptionRegistration {
       NoSuchAlgorithmException, IOException, NamingException, URISyntaxException,
       ConfigurationException, InterruptedException, ExecutionException {
 
-    QueueHelper.createAndBindQueue(this.queue, this.eventId, this.businessUnit);
+    BrokerHelper.createAndBindQueue(this.queue, this.eventId, this.businessUnit);
 
   }
 

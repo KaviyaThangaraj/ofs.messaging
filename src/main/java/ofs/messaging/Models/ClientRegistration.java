@@ -3,7 +3,13 @@
  */
 package ofs.messaging.Models;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
+
+import javax.naming.NamingException;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.LoggerFactory;
@@ -11,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import ofs.messaging.Util;
 import ofs.messaging.Client.Exceptions.ClientAlreadyRegisteredException;
 import ofs.messaging.Client.Exceptions.EventIdDoesNotExistException;
+import ofs.messaging.Client.Helper.BrokerHelper;
 import ofs.messaging.Persistence.PersistenceManager;
 import ch.qos.logback.classic.Logger;
 
@@ -33,7 +40,9 @@ public class ClientRegistration {
 
   // /FIXME: have an enum for business unit and if possible, enforce this through a proeprty file
   public ClientRegistration(String clientName, String description, String businessUnit,
-      String eventId) throws ConfigurationException, InterruptedException, ExecutionException {
+      String eventId) throws ConfigurationException, InterruptedException, ExecutionException,
+      KeyManagementException, NoSuchAlgorithmException, IOException, NamingException,
+      URISyntaxException {
 
     // FIXME: validate if the eventId provided is avbl already and if not, please stop this
     // registration
@@ -65,6 +74,7 @@ public class ClientRegistration {
     PersistenceManager.saveClientRegistration(this);
     // FIXME: check if creating the routing id here is ok!
     this.routingKey = setupRoutingKey(this);
+    BrokerHelper.createExchange(eventId);
 
 
   }

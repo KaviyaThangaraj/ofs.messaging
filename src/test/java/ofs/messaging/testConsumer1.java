@@ -34,11 +34,11 @@ import com.rabbitmq.client.AMQP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class testConsumer {
+public class testConsumer1 {
 
-  public static final Logger log = LoggerFactory.getLogger(testConsumer.class);
+  public static final Logger log = LoggerFactory.getLogger(testConsumer1.class);
 
-  public testConsumer() {
+  public testConsumer1() {
 
   }
 
@@ -48,7 +48,8 @@ public class testConsumer {
     RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
     Channel channelObject = null;
-    String eventId = PersistenceManager.listEvents().get(6).getEventId();
+    // same client, different event id
+    String eventId = PersistenceManager.listEvents().get(5).getEventId();
     log.debug("Event id is {}", eventId);
 
     try {
@@ -71,8 +72,7 @@ public class testConsumer {
 
 
       String queueName = PersistenceManager.getQueueFromSubscriptionClientId(clientId);
-      // string queueName is yet to be bound, hardcoding it now
-      // queueName = "testPublishingWithNewClientRegistration";
+
 
       log.debug("Queue name is {}", queueName);
       MessageHandler messageHandler = new MessageHandler(channelObject) {

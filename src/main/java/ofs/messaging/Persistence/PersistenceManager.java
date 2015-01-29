@@ -6,16 +6,15 @@ import java.util.List;
 
 import ofs.messaging.testPublishingWithNewClientRegistration;
 import ofs.messaging.Client.Exceptions.ClientIdDoesNotExistException;
+import ofs.messaging.Client.Exceptions.ClientNotYetRegisteredException;
 import ofs.messaging.Models.ClientRegistration;
 import ofs.messaging.Models.Event;
-
 import ofs.messaging.Models.SubscriptionRegistration;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,7 @@ public class PersistenceManager {
 
     Session session = initHibernate();
     Transaction tx = session.beginTransaction();
-    session.saveOrUpdate(clientRegistration);
+    session.save(clientRegistration);
     tx.commit();
 
 
@@ -88,6 +87,7 @@ public class PersistenceManager {
 
     // /FIXME: this returns false, event though the value is in the list. debug!!
     // return listEvents().contains(eventId);
+    // /FIXME: override the equals method!. will work
 
     for (Event row : listEvents()) {
       if (row.getEventId().equalsIgnoreCase(eventId)) {
@@ -97,7 +97,7 @@ public class PersistenceManager {
     return false;
   }
 
-  public static String getExangeIdFromClientId(String clientId) {
+  public static String getExangeIdFromClientIdAndEventId(String clientId, String eventId) {
 
 
     Session session = initHibernate();
@@ -105,8 +105,9 @@ public class PersistenceManager {
 
     Query q =
         session.createQuery("from " + ClientRegistration.class.getName()
-            + " as clReg where clReg.clientRegistrationId=? ");
+            + " as clReg where clReg.clientRegistrationId=? and clReg.eventId=?");
     q.setParameter(0, clientId);
+    q.setParameter(1, eventId);
     List<ClientRegistration> list = q.list();
     log.debug("List of Client Registration Query came back with "
         + (list != null ? list.size() : "list empty") + " results");
@@ -274,5 +275,27 @@ public class PersistenceManager {
     throw new ClientIdDoesNotExistException(
         "The client Id supplied does not exist. Please verify the input value");
 
+  }
+
+  public static ClientRegistration getExangeIdFromOtherClientDetails(String clientId,
+      String businessUnit, String eventId) {
+    Session session = initHibernate();
+    Transaction tx = session.beginTransaction();
+    Query q =
+        session.createQuery("from " + ClientRegistration.class.getName()
+            + " as clReg where clReg.clientName=? and clReg.businessUnit=? and clReg.eventId=?");
+    q.setParameter(0, clientId);
+    q.setParameter(1, businessUnit);
+    q.setParameter(2, eventId);
+
+    List<ClientRegistration> list = q.list();
+    if (list != null && list.size() == 1) {
+
+      return list.get(0);
+
+    }
+
+    throw new ClientNotYetRegisteredException("Please check the client Id as this client has not "
+        + "yet registered for publication of Messages");
   }
 }
