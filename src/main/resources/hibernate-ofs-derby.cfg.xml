@@ -11,6 +11,8 @@
        <property name="hibernate.connection.url"> jdbc:derby://localhost:1527//Users/ramanann/Documents/workspace/MessagingDB;create=true;create=true </property>
        <property name="hibernate.connection.username">null</property>
        <property name="hibernate.connection.password">null</property>
+       
+       <property name="hibernate.default_schema">Messaging</property>
 
        <!-- Enable Hibernate's automatic session context management -->
        <property name="current_session_context_class">thread</property>
