@@ -132,6 +132,8 @@ public class testExistingPublishingClient1 {
       log.error("App failed", e);
 
     } finally {
+for(int i=0;i<clientNew.resultList.size();i++)
+    System.out.println(clientNew.resultList.get(i).get());
       System.exit(0);
     }
   }

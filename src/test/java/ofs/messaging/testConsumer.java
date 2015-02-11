@@ -27,7 +27,6 @@ import ofs.messaging.Client.Impl.RabbitMQChannel;
 import ofs.messaging.Client.Impl.RabbitMQClient;
 import ofs.messaging.Client.Impl.RabbitMQConnection;
 import ofs.messaging.Models.ClientRegistration;
-import ofs.messaging.Models.SubscriptionRegistration;
 import ofs.messaging.Persistence.PersistenceManager;
 
 import com.rabbitmq.client.AMQP;
@@ -48,31 +47,52 @@ public class testConsumer {
     RabbitMQConnection con = (RabbitMQConnection) ctx.lookup("RabbitMQConnection");
 
     Channel channelObject = null;
+<<<<<<< HEAD:src/test/java/ofs/messaging/testConsumer.java
     String eventId = PersistenceManager.listEvents().get(6).getEventId();
     log.debug("Event id is {}", eventId);
+=======
+>>>>>>> parent of 5b004dc... cleaned up. added subscription:src/main/java/ofs/messaging/testConsumer.java
 
     try {
-
-      // creating the client and registering an event - for subscription?
       RabbitMQClient clientNew =
+<<<<<<< HEAD:src/test/java/ofs/messaging/testConsumer.java
           new RabbitMQClient().getInstance(new SubscriptionRegistration("CONSUMER1",
               "OFS Client description1", "BU1", eventId));
 
+=======
+          new RabbitMQClient().getInstance(new ClientRegistration("GMO OMS",
+              "OFS Client description", "GMO", "69654ef1-5c99-4df6-b427-25427e4d4fdd"));
+>>>>>>> parent of 5b004dc... cleaned up. added subscription:src/main/java/ofs/messaging/testConsumer.java
 
+      String dispatchEventId = PersistenceManager.listEvents().get(6).getEventId();
+      log.debug(dispatchEventId);
 
       String clientId = clientNew.getClientId().toString();
+      final String exchangeId = PersistenceManager.getExangeIdFromClientId(clientId);
 
+<<<<<<< HEAD:src/test/java/ofs/messaging/testConsumer.java
       log.debug("ClientId is {}", clientId);
 
 
 
+=======
+      if (exchangeId.isEmpty()) {
+        throw new Exception("Exchange Id shouldnt be null. check the client id");
+      }
+>>>>>>> parent of 5b004dc... cleaned up. added subscription:src/main/java/ofs/messaging/testConsumer.java
       channelObject = new RabbitMQChannel(con.connect());
 
+      // this is not required
+      // channelObject.createChannel();
 
+<<<<<<< HEAD:src/test/java/ofs/messaging/testConsumer.java
 
       String queueName = PersistenceManager.getQueueFromSubscriptionClientId(clientId);
       // string queueName is yet to be bound, hardcoding it now
       // queueName = "testPublishingWithNewClientRegistration";
+=======
+      String queueName = "test";
+>>>>>>> parent of 5b004dc... cleaned up. added subscription:src/main/java/ofs/messaging/testConsumer.java
 
       log.debug("Queue name is {}", queueName);
       MessageHandler messageHandler = new MessageHandler(channelObject) {
@@ -115,4 +135,5 @@ public class testConsumer {
       System.exit(-1);
     }
   }
+
 }
