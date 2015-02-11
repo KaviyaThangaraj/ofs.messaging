@@ -1,6 +1,12 @@
 package ofs.messaging;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
+
+import javax.naming.NamingException;
 
 import org.apache.commons.configuration.ConfigurationException;
 
@@ -14,16 +20,15 @@ public class testEventCreation {
   }
 
   public static void main(String[] args) throws ConfigurationException, InterruptedException,
-      ExecutionException {
-    Event e = new Event("CREATION");
-    PersistenceManager.saveEvent(e);
+      ExecutionException, KeyManagementException, NoSuchAlgorithmException, IOException, NamingException, URISyntaxException {
+    Event e = new Event("CREATION "); 
     e = new Event("PONR");
-    PersistenceManager.saveEvent(e);
+    
 
     e = new Event("RELEASE");
-    PersistenceManager.saveEvent(e);
-    e = new Event("DISPATCH");
-    PersistenceManager.saveEvent(e);
+    
+    e = new Event(" DISPATCH");
+    
 
   }
 

@@ -1,12 +1,19 @@
 package ofs.messaging.Persistence;
 
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
+import javax.naming.NamingException;
 
 import ofs.messaging.testPublishingWithNewClientRegistration;
 import ofs.messaging.Client.Exceptions.ClientIdDoesNotExistException;
 import ofs.messaging.Client.Exceptions.ClientNotYetRegisteredException;
+import ofs.messaging.Client.Helper.BrokerHelper;
 import ofs.messaging.Models.ClientRegistration;
 import ofs.messaging.Models.Event;
 import ofs.messaging.Models.SubscriptionRegistration;
@@ -36,13 +43,15 @@ public class PersistenceManager {
     return configuration.buildSessionFactory().getCurrentSession();
   }
 
-  public static void saveEvent(Event event) {
+  public static void saveEvent(Event event) throws KeyManagementException, NoSuchAlgorithmException, IOException, NamingException, URISyntaxException {
 
-
+   
     Session session = initHibernate();
     Transaction tx = session.beginTransaction();
     session.saveOrUpdate(event);
     tx.commit();
+   
+    
 
   }
 
@@ -74,8 +83,10 @@ public class PersistenceManager {
     Transaction tx = session.beginTransaction();
     Query q = session.createQuery("from " + Event.class.getName());
     List<Event> list = q.list();
+    
     log.debug("List of Events Query came back with " + list.size() + " results");
     for (Event e : list) {
+      
       log.debug(e.getEventId() + "\n");
     }
     return list;
@@ -96,7 +107,25 @@ public class PersistenceManager {
     }
     return false;
   }
+//////////////////////////////////////////////////\
+  
+  public static boolean isEventNameExists(String eventName) {
 
+	    //log.debug("-----" + eventName + "-------");
+
+	    
+
+	    for (Event row : listEvents()) {
+	      if (row.getEventName().equalsIgnoreCase(eventName)) {
+	        return true;
+	      }
+	    }
+	    return false;
+	  }
+
+  /////////////////////////////////////////////////////////////////
+  
+  
   public static String getExangeIdFromClientIdAndEventId(String clientId, String eventId) {
 
 
