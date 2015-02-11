@@ -19,13 +19,18 @@
         <property name="businessUnit" type="java.lang.String">
             <column name="BUSINESSUNIT" />
         </property>
+<<<<<<< HEAD
        
+=======
+        <property name="clientRegistrationId" type="java.util.UUID">
+            <column name="CLIENTREGISTRATIONID" />
+        </property>
+>>>>>>> parent of 5b004dc... cleaned up. added subscription
         <property name="clientDescription" type="java.lang.String">
             <column name="CLIENTDESCRIPTION" />
         </property>
         <property name="exchangeId" type="java.lang.String">
             <column name="EXCHANGEID" />
         </property>
-        
     </class>
 </hibernate-mapping>

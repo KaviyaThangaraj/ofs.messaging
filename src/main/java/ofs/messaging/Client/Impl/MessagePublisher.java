@@ -1,11 +1,13 @@
 package ofs.messaging.Client.Impl;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.configuration.ConfigurationException;
 
 import com.google.gson.Gson;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 import ofs.messaging.Models.Routing;
 
-public class MessagePublisher implements Runnable {
+public class MessagePublisher implements Runnable, Callable<String> {
 
   public static final Logger log = LoggerFactory.getLogger(MessagePublisher.class);
   private Channel channel = null;
@@ -90,9 +92,11 @@ public class MessagePublisher implements Runnable {
 
   public void run() {
     try {
-
+       System.out.println("entered run");
       byte[] bytes = Util.toByteArray(this.Message);
+      System.out.println(bytes);
       channel.basicPublish(exchangeId, this.routingKey, bytes);
+      System.out.println("message published");
       if (this.Message.isRedundant()) {
         try {
           storeMessage(this);
@@ -125,5 +129,11 @@ public class MessagePublisher implements Runnable {
 
     log.debug("Storing message " + messagePublisher.getMessage().getMessageId());
   }
+
+@Override
+public String call() throws Exception {
+	// TODO Auto-generated method stub
+	return null;
+}
 
 }

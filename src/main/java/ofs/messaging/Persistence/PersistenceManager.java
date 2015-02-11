@@ -4,12 +4,18 @@ package ofs.messaging.Persistence;
 import java.nio.file.Paths;
 import java.util.List;
 
+<<<<<<< HEAD
 import ofs.messaging.testPublishingWithNewClientRegistration;
 import ofs.messaging.Client.Exceptions.ClientIdDoesNotExistException;
 import ofs.messaging.Client.Exceptions.ClientNotYetRegisteredException;
 import ofs.messaging.Models.ClientRegistration;
 import ofs.messaging.Models.Event;
 import ofs.messaging.Models.SubscriptionRegistration;
+=======
+import ofs.messaging.Event;
+import ofs.messaging.test;
+import ofs.messaging.Models.ClientRegistration;
+>>>>>>> parent of 5b004dc... cleaned up. added subscription
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -47,6 +53,7 @@ public class PersistenceManager {
   }
 
   public static void saveClientRegistration(ClientRegistration clientRegistration) {
+<<<<<<< HEAD
 
 
     Session session = initHibernate();
@@ -59,6 +66,8 @@ public class PersistenceManager {
   }
 
   public static void saveSubscriptionRegistration(SubscriptionRegistration subscriptionRegistration) {
+=======
+>>>>>>> parent of 5b004dc... cleaned up. added subscription
 
 
     Session session = initHibernate();
@@ -102,6 +111,7 @@ public class PersistenceManager {
 
     Session session = initHibernate();
     Transaction tx = session.beginTransaction();
+<<<<<<< HEAD
 
     Query q =
         session.createQuery("from " + ClientRegistration.class.getName()
@@ -198,9 +208,20 @@ public class PersistenceManager {
       // assumption is that there can be only one matching record and hence returning the first one!
       return list.get(0).getQueue().toString();
 
+=======
+    Query q = session.createQuery("from " + ClientRegistration.class.getName());
+    List<ClientRegistration> list = q.list();
+    log.debug("List of Client Registration Query came back with " + list.size() + " results");
+    log.debug("Incoming clientID is==>" + clientId);
+
+    for (ClientRegistration row : list) {
+      if (row.getClientRegistrationId().toString().equalsIgnoreCase(clientId)) {
+        return row.getExchangeId();
+      }
+>>>>>>> parent of 5b004dc... cleaned up. added subscription
     }
-    log.debug("List of Subscription Registration Query came back with Empty results");
     return null;
+<<<<<<< HEAD
   }
 
   public static void cleanUp() {
@@ -214,8 +235,9 @@ public class PersistenceManager {
     session.createSQLQuery("drop table SUBSCRIPTIONREGISTRATION").executeUpdate();
     // session.createSQLQuery("drop table .NULL.EVENT").executeUpdate();
     session.createSQLQuery("drop table CLIENTREGISTRATION").executeUpdate();
+=======
+>>>>>>> parent of 5b004dc... cleaned up. added subscription
 
-    tx.commit();
   }
 
   public static String getRegistrationClientIdFromOtherDetails(String clientId, String businessUnit) {
