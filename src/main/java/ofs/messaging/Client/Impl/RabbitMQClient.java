@@ -15,7 +15,6 @@ import ofs.messaging.Models.SubscriptionRegistration;
 
 import java.nio.channels.InterruptedByTimeoutException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Ramanan Natarajan
  *
  */
-public class RabbitMQClient implements MessagingClient{
+public class RabbitMQClient implements MessagingClient {
 
   public static final Logger log = LoggerFactory.getLogger(MessagingClient.class);
 
@@ -43,11 +42,9 @@ public class RabbitMQClient implements MessagingClient{
   private String clientName;
   private ExecutorService executorService;
   private MessageHandler handler;
-  MessagePublisher messagepublisher=null;
-  Callable<String> c=null;
- public static List<Future<String>> resultList = new ArrayList<Future<String>>();
 
-
+  Callable<String> m=null;
+  public static List<Future<String>> resultList = new ArrayList<Future<String>>();
   /*
    * FIXME: Also, when we create a client, we can return the Id, and then on registration take the
    * clientId and register and return back the exchange to which it has to be published
@@ -137,9 +134,9 @@ public class RabbitMQClient implements MessagingClient{
 
     if (client.executorService == null) {
       // We want at least 4 threads, even if we only have 2 CPUS.
-    // int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
-    	System.out.println("hi");
-    	int nThreads=1;
+      int nThreads = Math.max(4, Runtime.getRuntime().availableProcessors() / 2);
+    	//int nThreads =1;
+
       final ThreadFactory clientThreadFactory = new ThreadFactory() {
         private final AtomicInteger threadNumber = new AtomicInteger(1);
 
@@ -149,35 +146,28 @@ public class RabbitMQClient implements MessagingClient{
           return thread;
         }
       };
-      client.executorService  = Executors.newFixedThreadPool(nThreads, clientThreadFactory);
-      
-	
-      
+      client.executorService = Executors.newFixedThreadPool(nThreads, clientThreadFactory);
+
     }
     return client;
 
   }
 
-  @SuppressWarnings("unchecked")
-public void publish(MessagePublisher messagepublisher) {
-	 
-	 
-	  
-	  
+  public void publish(MessagePublisher messagePublisher) {
 
-                          // resultList.add((Future<Object>) this.executorService.submit(m)) ;
- this.c= new MessagePublisher(messagepublisher.getChannel(),
-        messagepublisher.getExchangeId(), messagepublisher.getRoutingKey(), messagepublisher
-        .getMessage());
-   Future<String> future =(Future<String>) this.executorService.submit(c); 
-   resultList.add( future);
-   
-   this.executorService.execute((Runnable) c);
-                          
-    
-        
-     
+	  log.debug("inside the publish method of client");
+   //this.executorService.execute(new MessagePublisher(messagePublisher.getChannel(),
+      //  messagePublisher.getExchangeId(), messagePublisher.getRoutingKey(), messagePublisher
+        //    .getMessage()) {
+//
+  //  });
 
+	   this.m= new MessagePublisher(messagePublisher.getChannel(),
+		        messagePublisher.getExchangeId(), messagePublisher.getRoutingKey(), messagePublisher
+		            .getMessage());
+      Future<String> future= (Future<String>)this.executorService.submit(m);
+      resultList.add(future);
+	  this.executorService.execute((Runnable) m);
   }
 
 
@@ -196,7 +186,18 @@ public void publish(MessagePublisher messagepublisher) {
     this.handler = handler;
   }
 
- 
+  public void waitForScheduledTasksToComplete(int i, TimeUnit seconds)
+      throws InterruptedByTimeoutException {
+
+    // Wait until all threads are finish
+    try {
+      this.executorService.awaitTermination(200, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+
+      throw new InterruptedByTimeoutException();
+    }
+
+  }
 
 
 }

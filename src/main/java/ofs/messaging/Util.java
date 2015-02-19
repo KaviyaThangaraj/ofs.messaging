@@ -10,6 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.UUID;
 
+import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
+
 /**
  * @author Ramanan Natarajan
  *         <p>
@@ -46,8 +48,10 @@ public class Util {
 			oos.flush();
 			bytes = bos.toByteArray();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 
+			throw new MessagePublishingFailedException("Conversion to byte array failed",e);
+			
 		} finally {
 
 			if (oos != null) {

@@ -25,12 +25,9 @@
        <property name="hibernate.show_sql">false</property>
        <property name="hibernate.format_sql">false</property>
 
-<<<<<<< HEAD
        <mapping resource="ofs/messaging/Models/Event.hbm.xml"/>
        
-=======
-       <mapping resource="ofs/messaging/Event.hbm.xml"/>
->>>>>>> parent of 5b004dc... cleaned up. added subscription
        <mapping resource="ofs/messaging/Models/ClientRegistration.hbm.xml"/>
+        <mapping resource="ofs/messaging/Models/SubscriptionRegistration.hbm.xml"/>
    </session-factory>
 </hibernate-configuration>

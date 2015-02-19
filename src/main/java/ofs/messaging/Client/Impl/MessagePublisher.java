@@ -19,7 +19,7 @@ import ofs.messaging.Client.Channel;
 import ofs.messaging.Client.Exceptions.MessagePublishingFailedException;
 import ofs.messaging.Models.Routing;
 
-public class MessagePublisher implements Runnable, Callable<String> {
+public class MessagePublisher implements Runnable,Callable<String> {
 
   public static final Logger log = LoggerFactory.getLogger(MessagePublisher.class);
   private Channel channel = null;
@@ -32,6 +32,7 @@ public class MessagePublisher implements Runnable, Callable<String> {
     this.exchangeId = exchangeId;
     this.routingKey = routingKey;
     this.Message = message;
+    log.debug("Publisher with this message created {}",this.Message.getMessageId());
   }
 
   /**
@@ -92,24 +93,26 @@ public class MessagePublisher implements Runnable, Callable<String> {
 
   public void run() {
     try {
-       System.out.println("entered run");
-      byte[] bytes = Util.toByteArray(this.Message);
-      System.out.println(bytes);
-      channel.basicPublish(exchangeId, this.routingKey, bytes);
-      System.out.println("message published");
-      if (this.Message.isRedundant()) {
-        try {
-          storeMessage(this);
-        } catch (InterruptedException e) {
-          log.error("Storing failed ", e);
-          e.printStackTrace();
-        } catch (ExecutionException e) {
 
-          log.error("Storing failed ", e);
-        } catch (ConfigurationException e) {
-          log.error("Storing failed ", e);
-        }
-      }
+    	log.debug("before byarray conversion");
+      byte[] bytes = Util.toByteArray(this.Message);
+      channel.basicPublish(exchangeId, this.routingKey, bytes);
+      
+      log.debug("Thread {}, message {}", Thread.currentThread().getName(), this.Message.getMessageId());
+      
+//      if (this.Message.isRedundant()) {
+//        try {
+//          storeMessage(this);
+//        } catch (InterruptedException e) {
+//          log.error("Storing failed ", e);
+//          e.printStackTrace();
+//        } catch (ExecutionException e) {
+//
+//          log.error("Storing failed ", e);
+//        } catch (ConfigurationException e) {
+//          log.error("Storing failed ", e);
+//        }
+//      }
     } catch (IOException e) {
 
       throw new MessagePublishingFailedException("publishing this message with MessageId="

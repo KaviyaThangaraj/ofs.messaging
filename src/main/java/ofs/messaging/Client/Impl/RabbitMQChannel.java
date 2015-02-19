@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ofs.messaging.Client.ExchangeType;
 import ofs.messaging.Client.Exceptions.ChannelException;
 import ofs.messaging.Client.Exceptions.ConnectionFailedException;
@@ -26,6 +29,7 @@ import com.rabbitmq.client.QueueingConsumer;
  */
 public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 
+	 public static final Logger log = LoggerFactory.getLogger(RabbitMQChannel.class);
   private com.rabbitmq.client.Connection connection = null;
   private Channel channel = null;
 
@@ -143,8 +147,9 @@ public class RabbitMQChannel implements ofs.messaging.Client.Channel {
 
     try {
       this.channel.basicPublish(exchange, routingKey, mandatory, immediate, props, body);
-      body = null;
-    } catch (IOException e) {
+      log.error("Successfully published");
+     // body = null;
+    } catch (Exception e) {
 
       throw new MessagePublishingFailedException("Publishing this Message Failed", e);
     }
